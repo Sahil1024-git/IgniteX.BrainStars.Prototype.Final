@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Facts Trivia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .robot-icon {
+            font-size: 4rem;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-15px);
+            }
+            60% {
+                transform: translateY(-8px);
+            }
+        }
+        .content {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            min-height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .button {
+            background-color: #f7a83b;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            background-color: #e59427;
+        }
+        .button:active {
+            transform: translateY(0);
+        }
+        .choices-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+        .choice-button {
+            background-color: #8c82df;
+            color: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .choice-button:hover {
+            background-color: #6e65b5;
+        }
+        .correct {
+            background-color: #4CAF50;
+            transform: scale(1.05);
+            animation: pulse 1s infinite;
+        }
+        .incorrect {
+            background-color: #F44336;
+            transform: rotate(5deg);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+        #message {
+            margin-top: 10px;
+            font-weight: 700;
+            min-height: 30px;
+        }
+        #next-button {
+            margin-top: 20px;
+        }
+        .score-display, .progress-display {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container" id="math-trivia-game-container">
+    <div class="header">Math Facts Trivia!</div>
+    <div class="robot-icon">🤖</div>
+    <div id="content" class="content">
+        <p>Hi there! I'm Math-Bot, ready to teach you some cool facts about numbers! Ready to learn?</p>
+    </div>
+    <div id="score-and-progress" class="hidden flex justify-between w-full px-4 mb-4">
+        <div id="score-display" class="score-display">Score: 0</div>
+        <div id="progress-display" class="progress-display">Question 1 of 6</div>
+    </div>
+    <button id="start-button" class="button">Let's Get Started!</button>
+    <div id="quiz-area" class="hidden w-full">
+        <div id="choices-grid" class="choices-grid"></div>
+        <div id="message"></div>
+        <button id="next-button" class="hidden button">Next Question!</button>
+    </div>
+</div>
+
+<script>
+    const contentEl = document.getElementById('content');
+    const startButton = document.getElementById('start-button');
+    const quizArea = document.getElementById('quiz-area');
+    const choicesGrid = document.getElementById('choices-grid');
+    const messageEl = document.getElementById('message');
+    const nextButton = document.getElementById('next-button');
+    const scoreAndProgress = document.getElementById('score-and-progress');
+    const scoreDisplay = document.getElementById('score-display');
+    const progressDisplay = document.getElementById('progress-display');
+
+    // Math facts for the teaching phase
+    const facts = [
+        { text: "A **prime number** is a number greater than 1 that can only be divided by 1 and itself. Examples are 2, 3, 5, 7, and 11." },
+        { text: "The **order of operations** is a set of rules used to solve math problems. The acronym **PEMDAS** helps you remember: **P**arentheses, **E**xponents, **M**ultiplication and **D**ivision (from left to right), **A**ddition and **S**ubtraction (from left to right)." },
+        { text: "The **area** of a rectangle is found by multiplying its length by its width. The formula is A = l x w." },
+        { text: "A **right angle** is an angle that measures exactly 90 degrees. It looks like the corner of a square! 📐" },
+        { text: "A **fraction** represents a part of a whole. The top number is the numerator, and the bottom number is the denominator." },
+        { text: "The number **pi** ($\\pi$) is a special number that is approximately equal to 3.14. It is used to find the circumference and area of circles." }
+    ];
+
+    // Quiz questions based on the facts
+    const questions = [
+        {
+            question: "Which of the following is a prime number?",
+            choices: ["4", "9", "7", "10"],
+            answer: "7"
+        },
+        {
+            question: "According to PEMDAS, which operation comes first?",
+            choices: ["Addition", "Subtraction", "Multiplication", "Parentheses"],
+            answer: "Parentheses"
+        },
+        {
+            question: "If a rectangle has a length of 5 and a width of 3, what is its area?",
+            choices: ["8", "15", "10", "25"],
+            answer: "15"
+        },
+        {
+            question: "What is an angle that measures exactly 90 degrees called?",
+            choices: ["An acute angle", "An obtuse angle", "A right angle", "A straight angle"],
+            answer: "A right angle"
+        },
+        {
+            question: "In the fraction 3/4, what is the number '3' called?",
+            choices: ["The denominator", "The divisor", "The numerator", "The quotient"],
+            answer: "The numerator"
+        },
+        {
+            question: "The value of pi ($\\pi$) is approximately...",
+            choices: ["1.618", "2.718", "3.14", "4.25"],
+            answer: "3.14"
+        }
+    ];
+
+    let currentFactIndex = 0;
+    let currentQuestionIndex = 0;
+    let isLearningPhase = true;
+    let score = 0;
+
+    // Show the next fact or transition to the quiz
+    function showNextContent() {
+        if (isLearningPhase) {
+            if (currentFactIndex < facts.length) {
+                contentEl.innerHTML = `<p>${facts[currentFactIndex].text}</p>`;
+                currentFactIndex++;
+            } else {
+                isLearningPhase = false;
+                contentEl.innerHTML = `<p>Time to test your knowledge! Let's see what you remember. 🤔</p>`;
+                startButton.textContent = "Start Quiz!";
+            }
+        } else {
+            // Start the quiz
+            startButton.classList.add('hidden');
+            quizArea.classList.remove('hidden');
+            scoreAndProgress.classList.remove('hidden');
+            showQuestion();
+        }
+    }
+
+    // Display a question
+    function showQuestion() {
+        messageEl.textContent = '';
+        nextButton.classList.add('hidden');
+        choicesGrid.innerHTML = '';
+        const currentQuestion = questions[currentQuestionIndex];
+        contentEl.innerHTML = `<p>${currentQuestion.question}</p>`;
+        progressDisplay.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+
+        currentQuestion.choices.forEach(choice => {
+            const button = document.createElement('button');
+            button.textContent = choice;
+            button.classList.add('choice-button');
+            button.addEventListener('click', () => checkAnswer(choice, currentQuestion.answer));
+            choicesGrid.appendChild(button);
+        });
+    }
+
+    // Check if the selected answer is correct
+    function checkAnswer(selectedChoice, correctAnswer) {
+        const choiceButtons = choicesGrid.querySelectorAll('.choice-button');
+        choiceButtons.forEach(button => {
+            button.disabled = true;
+            if (button.textContent === correctAnswer) {
+                button.classList.add('correct');
+            } else {
+                button.classList.add('incorrect');
+            }
+        });
+
+        if (selectedChoice === correctAnswer) {
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+            messageEl.textContent = "Awesome job! You got it right! 🎉";
+        } else {
+            messageEl.textContent = `Not quite! The correct answer was "${correctAnswer}". Don't worry, you'll get the next one!`;
+        }
+        nextButton.classList.remove('hidden');
+    }
+
+    // Move to the next question or end the game
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            showQuestion();
+        } else {
+            contentEl.innerHTML = `<p>You did it! You've finished the quiz. You got ${score} out of ${questions.length} questions correct! You're a math master! 💯</p>`;
+            quizArea.classList.add('hidden');
+            scoreAndProgress.classList.add('hidden');
+            startButton.textContent = "Play Again?";
+            startButton.classList.remove('hidden');
+            startButton.onclick = () => window.location.reload();
+        }
+    }
+
+    startButton.addEventListener('click', showNextContent);
+    nextButton.addEventListener('click', nextQuestion);
+
+    // Initial message
+    showNextContent();
+
+    function showMathTrivia() {
+      document.getElementById('math-trivia-game-container').classList.remove('hidden');
+      document.getElementById('math-trivia-game-container').style.display = 'flex';
+      // Reset the game state
+      currentFactIndex = 0;
+      currentQuestionIndex = 0;
+      isLearningPhase = true;
+      score = 0;
+      showNextContent();
+    }
+
+</script>
+
+</body>
+</html>

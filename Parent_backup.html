@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IgniteX - Parent Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Fredoka One', cursive;
+            background-color: #F8F4EE;
+            color: #3C3744;
+            overflow: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150vw;
+            height: 150vw;
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.05) 0%, rgba(248, 244, 238, 0) 60%);
+            z-index: -1;
+        }
+        .container {
+            background-color: #E5E0DA;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            animation: fadeIn 0.5s ease-in-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            background-color: #F8F4EE;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .header-button {
+            background-color: #DC143C;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .header-button:hover {
+            transform: scale(1.05);
+            background-color: #FF4500;
+        }
+        .text-crimson {
+            color: #DC143C;
+        }
+        .text-dark-orange {
+            color: #FF4500;
+        }
+        .logout-btn {
+            background-color: #3C3744;
+            color: #F8F4EE;
+        }
+        .logout-btn:hover {
+            background-color: #5C5764;
+        }
+        .delete-btn {
+            background-color: #DC143C;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .delete-btn:hover {
+            transform: scale(1.05);
+            background-color: #FF0000;
+        }
+        .password-btn {
+            background-color: #DC143C;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .password-btn:hover {
+            transform: scale(1.05);
+            background-color: #00008B;
+        }
+        .username-btn {
+            background-color: #DC143C;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .username-btn:hover {
+            transform: scale(1.05);
+            background-color: #008080;
+        }
+        input, select, textarea {
+            padding: 1rem;
+            border: 2px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background-color: #F8F4EE;
+            color: #3C3744;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #DC143C;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background-color: #E5E0DA;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 400px;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background-color: #E5E0DA;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            min-width: 200px;
+            transform-origin: top right;
+            animation: scaleIn 0.2s ease-in-out;
+        }
+        .dropdown-menu button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #D1D5DB;
+            color: #3C3744;
+        }
+        .dropdown-menu button:last-child {
+            border-bottom: none;
+        }
+        .dropdown-menu button:hover {
+            background-color:#DC143C;
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="container">
+        <header class="flex justify-between items-center mb-10 pb-4 border-b-2 border-[#DC143C] relative z-20">
+            <h1 class="text-4xl font-bold text-crimson">
+                Hello, <span id="parent-name">Parent</span>! 👋
+            </h1>
+            <div class="flex items-center space-x-4">
+                <button id="logout-btn" class="header-button logout-btn">Logout</button>
+                <div class="relative">
+                    <button id="menu-toggle-btn" class="p-2 rounded-full hover:bg-[#F0EDE8] transition-colors duration-200">
+                        <svg class="w-6 h-6 text-[#3C3744]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path>
+                        </svg>
+                    </button>
+                    <div id="menu-dropdown" class="dropdown-menu hidden">
+                        <button id="change-username-btn">Change Username</button>
+                        <button id="change-password-btn">Change Password</button>
+                        <button id="delete-account-btn" class="text-red-500">Delete Account</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="space-y-8">
+            <section id="link-child-section">
+                <h2 class="text-3xl font-bold text-dark-orange mb-4">Link Your Child's Account</h2>
+                <form id="link-child-form" class="flex flex-col space-y-4">
+                    <input type="text" id="child-username" placeholder="Child's Username" required>
+                    <button type="submit" class="header-button">Link Account</button>
+                </form>
+                <p id="link-status" class="text-center mt-4"></p>
+            </section>
+
+            <section id="child-performance-section" class="hidden">
+                <h2 class="text-3xl font-bold text-dark-orange mb-4">
+                    <span id="child-name">Child</span>'s Performance
+                </h2>
+                
+                <h3 class="text-2xl font-bold text-crimson mb-4">Upcoming Assignments</h3>
+                <div id="assignments-list" class="space-y-4 mb-8">
+                    </div>
+
+                <h3 class="text-2xl font-bold text-crimson mb-4">Notes & Resources</h3>
+                <div id="notes-list" class="space-y-4 mb-8">
+                    </div>
+                
+                <h3 class="text-2xl font-bold text-crimson mb-4">Test Marks</h3>
+                <div id="marks-list" class="space-y-4 mb-8">
+                    </div>
+
+                <h3 class="text-2xl font-bold text-crimson mb-4">Leave a comment for the teacher</h3>
+                <form id="comment-form" class="flex flex-col space-y-4">
+                    <textarea id="parent-comment" placeholder="Type your comment here..." class="p-4 rounded-md" rows="3" required></textarea>
+                    <button type="submit" class="header-button">Submit Comment</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <div id="password-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-crimson mb-4">Change Password</h3>
+            <form id="change-password-form" class="flex flex-col space-y-4">
+                <input type="password" id="old-password" placeholder="Current Password" required>
+                <input type="password" id="new-password" placeholder="New Password" required>
+                <input type="password" id="confirm-new-password" placeholder="Confirm New Password" required>
+                <p id="password-message" class="text-center text-sm hidden"></p>
+                <div class="flex justify-between space-x-2">
+                    <button type="submit" class="header-button w-full">Save</button>
+                    <button type="button" id="cancel-password-change" class="header-button logout-btn w-full">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="username-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-crimson mb-4">Change Username</h3>
+            <form id="change-username-form" class="flex flex-col space-y-4">
+                <input type="text" id="new-username" placeholder="New Username" required>
+                <input type="password" id="confirm-password-username" placeholder="Confirm Password" required>
+                <p id="username-message" class="text-center text-sm hidden"></p>
+                <div class="flex justify-between space-x-2">
+                    <button type="submit" class="header-button w-full">Save</button>
+                    <button type="button" id="cancel-username-change" class="header-button logout-btn w-full">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const parentNameElement = document.getElementById('parent-name');
+            const linkChildSection = document.getElementById('link-child-section');
+            const childPerformanceSection = document.getElementById('child-performance-section');
+            const childNameElement = document.getElementById('child-name');
+            const linkChildForm = document.getElementById('link-child-form');
+            const linkStatusElement = document.getElementById('link-status');
+            const assignmentsListElement = document.getElementById('assignments-list');
+            const notesListElement = document.getElementById('notes-list');
+            const marksListElement = document.getElementById('marks-list');
+            const commentForm = document.getElementById('comment-form');
+            const logoutBtn = document.getElementById('logout-btn');
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            const changePasswordBtn = document.getElementById('change-password-btn');
+            const changeUsernameBtn = document.getElementById('change-username-btn');
+            const passwordModal = document.getElementById('password-modal');
+            const usernameModal = document.getElementById('username-modal');
+            const cancelPasswordChangeBtn = document.getElementById('cancel-password-change');
+            const cancelUsernameChangeBtn = document.getElementById('cancel-username-change');
+            const changePasswordForm = document.getElementById('change-password-form');
+            const changeUsernameForm = document.getElementById('change-username-form');
+            const passwordMessageElement = document.getElementById('password-message');
+            const usernameMessageElement = document.getElementById('username-message');
+            const menuToggleBtn = document.getElementById('menu-toggle-btn');
+            const menuDropdown = document.getElementById('menu-dropdown');
+
+            menuToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menuDropdown.classList.toggle('hidden');
+            });
+
+            window.addEventListener('click', (e) => {
+                if (!menuToggleBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+                    menuDropdown.classList.add('hidden');
+                }
+            });
+
+            if (!currentUser || currentUser.role !== 'parent') {
+                alert('Access denied. Please log in as a parent.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            parentNameElement.textContent = currentUser.name;
+
+            if (currentUser.linkedChild) {
+                renderChildDashboard(currentUser.linkedChild);
+            } else {
+                linkChildSection.classList.remove('hidden');
+                childPerformanceSection.classList.add('hidden');
+            }
+
+            linkChildForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const childUsername = document.getElementById('child-username').value;
+                const users = JSON.parse(localStorage.getItem('users')) || {};
+                const childUser = users[childUsername];
+
+                if (childUser && childUser.role === 'student') {
+                    currentUser.linkedChild = childUsername;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    const allUsers = JSON.parse(localStorage.getItem('users')) || {};
+                    allUsers[currentUser.username].linkedChild = childUsername;
+                    localStorage.setItem('users', JSON.stringify(allUsers));
+
+                    linkStatusElement.textContent = `Successfully linked to ${childUser.name}.`;
+                    linkStatusElement.style.color = 'green';
+                    
+                    setTimeout(() => {
+                        renderChildDashboard(childUsername);
+                    }, 1000);
+                } else {
+                    linkStatusElement.textContent = 'Invalid username or not a student account.';
+                    linkStatusElement.style.color = '#DC143C';
+                }
+            });
+
+            function renderChildDashboard(childUsername) {
+                const users = JSON.parse(localStorage.getItem('users')) || {};
+                const childUser = users[childUsername];
+
+                if (childUser) {
+                    childNameElement.textContent = childUser.name;
+                    linkChildSection.classList.add('hidden');
+                    childPerformanceSection.classList.remove('hidden');
+
+                    const assignments = JSON.parse(localStorage.getItem('assignments')) || [];
+                    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+                    const allMarks = JSON.parse(localStorage.getItem('marks')) || {};
+                    const childMarks = allMarks[childUsername] || [];
+
+                    assignmentsListElement.innerHTML = '';
+                    if (assignments.length > 0) {
+                        assignments.forEach(assignment => {
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            card.innerHTML = `
+                                <p class="text-xl font-bold text-crimson">${assignment.title}</p>
+                                <p class="text-md text-[#3C3744] mt-1">${assignment.subject}</p>
+                                <p class="text-sm text-dark-orange mt-2">Due: ${assignment.dueDate}</p>
+                            `;
+                            assignmentsListElement.appendChild(card);
+                        });
+                    } else {
+                        assignmentsListElement.innerHTML = '<p class="text-center text-gray-500">No assignments posted yet.</p>';
+                    }
+
+                    notesListElement.innerHTML = '';
+                    if (notes.length > 0) {
+                        notes.forEach(note => {
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            card.innerHTML = `
+                                <p class="text-xl font-bold text-crimson">${note.title}</p>
+                                <p class="text-md text-[#3C3744] mt-1">Content: ${note.content}</p>
+                            `;
+                            notesListElement.appendChild(card);
+                        });
+                    } else {
+                        notesListElement.innerHTML = '<p class="text-center text-gray-500">No notes posted yet.</p>';
+                    }
+                    
+                    marksListElement.innerHTML = '';
+                    if (childMarks.length > 0) {
+                        childMarks.forEach(mark => {
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            card.innerHTML = `
+                                <p class="text-xl font-bold text-crimson">${mark.subject}</p>
+                                <p class="text-md text-[#3C3744] mt-1">Score: ${mark.score}</p>
+                            `;
+                            marksListElement.appendChild(card);
+                        });
+                    } else {
+                        marksListElement.innerHTML = '<p class="text-center text-gray-500">No marks available yet.</p>';
+                    }
+                }
+            }
+
+            commentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const comment = document.getElementById('parent-comment').value;
+                const childUsername = currentUser.linkedChild;
+                
+                if (childUsername) {
+                    const comments = JSON.parse(localStorage.getItem('comments')) || {};
+                    if (!comments[childUsername]) {
+                        comments[childUsername] = [];
+                    }
+                    comments[childUsername].push(comment);
+                    localStorage.setItem('comments', JSON.stringify(comments));
+                    alert('Comment submitted to the teacher!');
+                    document.getElementById('parent-comment').value = '';
+                } else {
+                    alert('Please link a child and enter a comment.');
+                }
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            });
+
+            deleteAccountBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                    const users = JSON.parse(localStorage.getItem('users')) || {};
+                    if (users[currentUser.username]) {
+                        delete users[currentUser.username];
+                        localStorage.setItem('users', JSON.stringify(users));
+                    }
+                    localStorage.removeItem('currentUser');
+                    alert('Your account has been deleted.');
+                    window.location.href = 'index.html';
+                }
+            });
+
+            changePasswordBtn.addEventListener('click', () => {
+                passwordModal.classList.remove('hidden');
+                menuDropdown.classList.add('hidden');
+            });
+
+            cancelPasswordChangeBtn.addEventListener('click', () => {
+                passwordModal.classList.add('hidden');
+                changePasswordForm.reset();
+                passwordMessageElement.classList.add('hidden');
+            });
+            
+            changePasswordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const oldPassword = document.getElementById('old-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+                if (oldPassword !== currentUser.password) {
+                    passwordMessageElement.textContent = 'Current password is incorrect.';
+                    passwordMessageElement.classList.remove('hidden');
+                    passwordMessageElement.style.color = '#DC143C';
+                    return;
+                }
+
+                if (newPassword !== confirmNewPassword) {
+                    passwordMessageElement.textContent = 'New passwords do not match.';
+                    passwordMessageElement.classList.remove('hidden');
+                    passwordMessageElement.style.color = '#DC143C';
+                    return;
+                }
+
+                const users = JSON.parse(localStorage.getItem('users')) || {};
+                users[currentUser.username].password = newPassword;
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                currentUser.password = newPassword;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                passwordMessageElement.textContent = 'Password changed successfully!';
+                passwordMessageElement.classList.remove('hidden');
+                passwordMessageElement.style.color = 'green';
+                
+                setTimeout(() => {
+                    passwordModal.classList.add('hidden');
+                    changePasswordForm.reset();
+                    passwordMessageElement.classList.add('hidden');
+                    passwordMessageElement.style.color = '#DC143C';
+                }, 2000);
+            });
+
+            changeUsernameBtn.addEventListener('click', () => {
+                usernameModal.classList.remove('hidden');
+                menuDropdown.classList.add('hidden');
+            });
+
+            cancelUsernameChangeBtn.addEventListener('click', () => {
+                usernameModal.classList.add('hidden');
+                changeUsernameForm.reset();
+                usernameMessageElement.classList.add('hidden');
+            });
+            
+            changeUsernameForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newUsername = document.getElementById('new-username').value;
+                const confirmPassword = document.getElementById('confirm-password-username').value;
+                
+                const users = JSON.parse(localStorage.getItem('users')) || {};
+
+                if (confirmPassword !== currentUser.password) {
+                    usernameMessageElement.textContent = 'Incorrect password.';
+                    usernameMessageElement.classList.remove('hidden');
+                    usernameMessageElement.style.color = '#DC143C';
+                    return;
+                }
+
+                if (users[newUsername]) {
+                    usernameMessageElement.textContent = 'Username is already taken.';
+                    usernameMessageElement.classList.remove('hidden');
+                    usernameMessageElement.style.color = '#DC143C';
+                    return;
+                }
+                
+                const oldUsername = currentUser.username;
+                const userData = users[oldUsername];
+                
+                delete users[oldUsername];
+                users[newUsername] = userData;
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                const allMarks = JSON.parse(localStorage.getItem('marks')) || {};
+                if (allMarks[oldUsername]) {
+                    allMarks[newUsername] = allMarks[oldUsername];
+                    delete allMarks[oldUsername];
+                    localStorage.setItem('marks', JSON.stringify(allMarks));
+                }
+
+                for (const user in users) {
+                    if (users[user].role === 'parent' && users[user].linkedChild === oldUsername) {
+                        users[user].linkedChild = newUsername;
+                    }
+                }
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                currentUser.username = newUsername;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                usernameMessageElement.textContent = 'Username changed successfully!';
+                usernameMessageElement.classList.remove('hidden');
+                usernameMessageElement.style.color = 'green';
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>

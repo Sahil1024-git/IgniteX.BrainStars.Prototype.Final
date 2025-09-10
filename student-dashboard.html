@@ -1,0 +1,2731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IgniteX - Student Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #B22222;
+            --secondary-green: #FFB347;
+            --background-light: #FFF5E6;
+            --surface-light: #FFEAD2;
+            --text-dark: #6B4E28;
+            --success-green: #10B981;
+            --warning-yellow: #F59E0B;
+            --error-red: #EF4444;
+        }
+
+        body {
+            font-family: 'Fredoka One', cursive;
+            background-image: url('Images/final-back.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .dashboard-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .header {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .card {
+            background-color: var(--surface-light);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 1rem;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-family: 'Fredoka One', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #9B1C1C;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-green);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #FF9500;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: var(--error-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #DC2626;
+            transform: translateY(-1px);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.25rem;
+            background-color: transparent;
+            border: none;
+            border-radius: 0.75rem;
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+            min-width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tab:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-green));
+            border-radius: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-tab.active {
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3);
+        }
+
+        .nav-tab.active:before {
+            opacity: 1;
+        }
+
+        .nav-tab:hover:not(.active) {
+            background-color: var(--surface-light);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tab Icons */
+        .nav-tab .icon {
+            width: 1rem;
+            height: 1rem;
+            display: inline-block;
+        }
+
+        /* Responsive navigation */
+        @media (max-width: 768px) {
+            .nav-tabs {
+                gap: 0.125rem;
+                padding: 0.25rem;
+            }
+            
+            .nav-tab {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+                flex-direction: column;
+                text-align: center;
+                min-width: 4rem;
+            }
+            
+            .nav-tab .icon {
+                width: 0.875rem;
+                height: 0.875rem;
+            }
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th, .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .table th {
+            background-color: var(--surface-light);
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: bold; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-primary { color: var(--primary-blue); }
+        .text-secondary { color: var(--secondary-green); }
+        .text-success { color: var(--success-green); }
+        .text-warning { color: var(--warning-yellow); }
+        .text-error { color: var(--error-red); }
+        .w-full { width: 100%; }
+
+        input, select, textarea {
+            padding: 1rem;
+            border: 2px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            font-family: 'Fredoka One', cursive;
+            transition: border-color 0.2s ease;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(178, 34, 34, 0.1);
+        }
+
+        /* Grid Layouts */
+        .grid {
+            display: grid;
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (min-width: 768px) {
+            .md\:grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .text-6xl {
+            font-size: 3.75rem;
+        }
+
+        /* Game specific styles */
+        #word-guess, #math-answer {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Task and Goal specific styles */
+        .task-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #dee2e6;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-blue);
+        }
+
+        .task-item.urgent {
+            border-color: var(--error-red);
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        }
+
+        .task-item.warning {
+            border-color: var(--warning-yellow);
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+
+        .task-item.normal {
+            border-color: var(--success-green);
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+        }
+
+        .task-priority {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .task-priority.urgent { background-color: var(--error-red); }
+        .task-priority.warning { background-color: var(--warning-yellow); }
+        .task-priority.normal { background-color: var(--success-green); }
+
+        .goal-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--surface-light);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .goal-item:hover {
+            background: #f0e5d0;
+        }
+
+        .goal-checkbox:checked + .goal-label {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .goal-label {
+            flex: 1;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .add-task-form {
+            background: var(--background-light);
+            border: 2px dashed var(--primary-blue);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-task-btn {
+            background: linear-gradient(135deg, var(--primary-blue), #8B0000);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-family: 'Fredoka One', cursive;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-task-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(178, 34, 34, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flex {
+                flex-direction: column;
+            }
+        }
+        
+        /* Trivia specific styles */
+        .trivia-game-container {
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 500px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            font-family: 'Fredoka', sans-serif;
+            text-align: center;
+        }
+        .trivia-header {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .trivia-robot-icon {
+            font-size: 3rem;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .trivia-content {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .trivia-button {
+            background-color: #f7a83b;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+        .trivia-button:hover {
+            transform: translateY(-2px);
+            background-color: #e59427;
+        }
+        .trivia-button:active {
+            transform: translateY(0);
+        }
+        .trivia-choices-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        .trivia-choice-button {
+            background-color: #8c82df;
+            color: #fff;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .trivia-choice-button:hover {
+            background-color: #6e65b5;
+        }
+        .trivia-correct {
+            background-color: #4CAF50;
+            transform: scale(1.05);
+            animation: pulse 1s infinite;
+        }
+        .trivia-incorrect {
+            background-color: #F44336;
+        }
+        #trivia-message {
+            margin-top: 10px;
+            font-weight: 700;
+            min-height: 20px;
+            color: #fff;
+        }
+        #trivia-next-button {
+            margin-top: 20px;
+        }
+        .trivia-score-display, .trivia-progress-display {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        .voice-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        /* Knowledge Coins Specific Style */
+        .knowledge-coins {
+            display: flex;
+            align-items: center;
+            background-color: #F59E0B;
+            color: white;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        /* Avatar Shop Styles */
+        .avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-align: center;
+        }
+        .avatar-display {
+            width: 150px;
+            height: 150px;
+            border: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+        .avatar-shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+            width: 100%;
+        }
+        .avatar-item {
+            background-color: var(--background-light);
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .avatar-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .avatar-image {
+            font-size: 2.5rem;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .avatar-cost {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+        }
+        .avatar-cost .coin {
+            font-size: 1.2rem;
+            margin-right: 0.25rem;
+            color: var(--warning-yellow);
+        }
+        .avatar-item.purchased {
+            border-color: var(--success-green);
+        }
+        .avatar-item.equipped {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px var(--primary-blue);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1 class="text-3xl text-primary font-bold">Student Dashboard</h1>
+                <p id="student-welcome" class="text-lg"></p>
+            </div>
+            <div class="flex gap-2">
+                <button id="profile-btn" class="btn btn-secondary">Profile</button>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('overview')">
+                <span class="icon">📊</span>
+                <span>Overview</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('assignments')">
+                <span class="icon">📚</span>
+                <span>Assignments</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('notes')">
+                <span class="icon">📝</span>
+                <span>Notes</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('marks')">
+                <span class="icon">🎯</span>
+                <span>My Marks</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('games')">
+                <span class="icon">🎮</span>
+                <span>Games</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('daily-quotes')">
+                <span class="icon">💡</span>
+                <span>Quotes</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('my-streak')">
+                <span class="icon">🔥</span>
+                <span>Streak</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('upcoming-tasks')">
+                <span class="icon">⏰</span>
+                <span>Tasks</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('avatars')">
+                <span class="icon">🛍️</span>
+                <span>Avatars</span>
+            </button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content">
+            <h2 class="text-2xl font-bold text-primary mb-4">Student Overview</h2>
+            <div class="card">
+                <h3 class="text-xl font-bold text-secondary mb-4">Quick Stats</h3>
+                <div class="flex gap-4 flex-wrap">
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-primary" id="assignments-count">0</p>
+                        <p class="text-sm">Assignments</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-primary" id="notes-count">0</p>
+                        <p class="text-sm">Notes</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-primary" id="marks-count">0</p>
+                        <p class="text-sm">Test Scores</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-success" id="current-streak">0</p>
+                        <p class="text-sm">🔥 Day Streak</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-warning" id="usage-time">0m</p>
+                        <p class="text-sm">Today's Usage</p>
+                    </div>
+                    <div class="text-center flex-1 min-w-[120px]">
+                        <div class="knowledge-coins justify-center">
+                            <span class="text-2xl font-bold" id="knowledge-coins-display">0</span>
+                            <span class="text-sm ml-2">Coins</span>
+                        </div>
+                        <p class="text-sm mt-1">Knowledge Coins</p>
+                    </div>
+                    <!-- New Badge display -->
+                    <div class="text-center flex-1 min-w-[120px]">
+                        <div id="badge-display" class="knowledge-coins justify-center" style="background-color: #cd7f32;">
+                            <span class="text-2xl font-bold" id="badge-emoji">🥉</span>
+                            <span class="text-sm ml-2" id="badge-name">Bronze</span>
+                        </div>
+                        <p class="text-sm mt-1">Current Badge</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="text-xl font-bold text-secondary mb-4">Daily Quote</h3>
+                <div id="daily-quote-preview">
+                    <p id="quote-text" class="italic text-lg mb-2">"Loading inspirational quote..."</p>
+                    <p id="quote-author" class="text-sm text-gray-600">- Author</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignments Tab -->
+        <div id="assignments-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">My Assignments</h2>
+            <div id="assignments-list">
+                <!-- Assignments will be populated here -->
+            </div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div id="notes-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">Notes & Resources</h2>
+            <div id="notes-list">
+                <!-- Notes will be populated here -->
+            </div>
+        </div>
+
+        <!-- Marks Tab -->
+        <div id="marks-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">My Test Marks</h2>
+            <div id="marks-list">
+                <!-- Marks will be populated here -->
+            </div>
+        </div>
+
+        <!-- Games Tab -->
+        <div id="games-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">Learning Games</h2>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="card">
+                    <h3 class="text-xl font-bold text-secondary mb-2">Memory Match Game</h3>
+                    <p class="mb-4">Test your memory skills with our educational memory matching game!</p>
+                    <button onclick="openMemoryGame()" class="btn btn-primary w-full">Play Now</button>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-bold text-secondary mb-2">Word Puzzle Game</h3>
+                    <p class="mb-4">Unscramble words to improve vocabulary and spelling skills!</p>
+                    <button onclick="showWordPuzzleGame()" class="btn btn-primary w-full">Play Now</button>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-bold text-secondary mb-2">Speed Math Race</h3>
+                    <p class="mb-4">Challenge yourself with fast-paced math problems!</p>
+                    <button onclick="showSpeedMathGame()" class="btn btn-primary w-full">Play Now</button>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-bold text-secondary mb-2">G.K. Quiz</h3>
+                    <p class="mb-4">Improve your General knowledge.</p>
+                    <button onclick="showGKTrivia()" class="btn btn-primary w-full">Play Now</button>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-bold text-secondary mb-2">Maths Trivia</h3>
+                    <p class="mb-4">Complete maths challenges and learn.</p>
+                     <button onclick="showMathTrivia()" class="btn btn-primary w-full">Play Now</button>
+                </div>
+            
+                <div class="card">
+                    <h3 class="text-xl font-bold text-secondary mb-2">Coming Soon</h3>
+                    <p class="mb-4">More educational games are being developed!</p>
+                    <button class="btn btn-secondary w-full" disabled>Coming Soon</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Avatars Tab -->
+        <div id="avatars-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">🛍️ Avatar Shop</h2>
+            <div class="card mb-4">
+                <h3 class="text-xl font-bold text-secondary mb-2">My Avatar</h3>
+                <div class="flex items-center gap-4">
+                    <div id="current-avatar-display" class="avatar-display">
+                        <span id="current-avatar-emoji">👨‍🎓</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-lg font-bold">Currently Equipped:</p>
+                        <p id="current-avatar-name" class="text-xl">Student</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="text-xl font-bold text-secondary mb-2">Available for Purchase</h3>
+                <p class="text-sm text-gray-600 mb-4">Earn more Knowledge Coins from games to unlock new avatars!</p>
+                <div id="avatar-shop-container" class="avatar-shop-grid">
+                    <!-- Avatars will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Quotes Tab -->
+        <div id="daily-quotes-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">Daily Inspiration</h2>
+            <div class="card text-center">
+                <h3 class="text-xl font-bold text-secondary mb-4">Quote of the Day</h3>
+                <div id="daily-quote-display">
+                    <p id="main-quote-text" class="text-2xl italic mb-4">"Loading quote..."</p>
+                    <p id="main-quote-author" class="text-lg text-gray-600 mb-4">- Author</p>
+                </div>
+                <button onclick="generateNewQuote()" class="btn btn-secondary">Get New Quote</button>
+            </div>
+            <div class="card">
+                <h3 class="text-xl font-bold text-secondary mb-4">Your Quote Collection</h3>
+                <div id="saved-quotes-list">
+                    <p class="text-center text-gray-500">No saved quotes yet. Generate some quotes to start your collection!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Streak Tab -->
+        <div id="my-streak-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">My Learning Streak</h2>
+            <div class="card text-center">
+                <h3 class="text-xl font-bold text-secondary mb-4">Current Streak</h3>
+                <div class="mb-6">
+                    <p class="text-6xl mb-2" id="streak-display">0🔥</p>
+                    <p class="text-lg">Days in a row!</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                        <p class="text-2xl font-bold text-primary" id="total-login-days">0</p>
+                        <p class="text-sm">Total Active Days</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-primary" id="total-usage-time">0h</p>
+                        <p class="text-sm">Total Usage Time</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="text-xl font-bold text-secondary mb-4">Today's Activity</h3>
+                <div class="flex justify-between items-center mb-2">
+                    <span>Time Spent Today:</span>
+                    <span id="today-usage-time" class="font-bold">0 minutes</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span>Assignments Viewed:</span>
+                    <span id="today-assignments-viewed" class="font-bold">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Games Played:</span>
+                    <span id="today-games-played" class="font-bold">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Tasks Tab -->
+        <div id="upcoming-tasks-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">📋 My Todo List</h2>
+            
+            <!-- Add New Task Form -->
+            <div class="add-task-form">
+                <h3 class="text-xl font-bold text-secondary mb-3">➕ Add New Task</h3>
+                <form id="add-task-form">
+                    <div style="margin-bottom: 1rem;">
+                        <input type="text" id="task-title" placeholder="Task title..." 
+                               style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 0.5rem; margin-bottom: 0.5rem; font-family: inherit;">
+                        <textarea id="task-description" placeholder="Task description..." 
+                                  style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 0.5rem; resize: vertical; min-height: 60px; font-family: inherit;"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <select id="task-priority" style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 0.5rem; font-family: inherit;">
+                            <option value="normal">🟢 Normal Priority</option>
+                            <option value="warning">🟡 Medium Priority</option>
+                            <option value="urgent">🔴 High Priority</option>
+                        </select>
+                        <input type="date" id="task-due-date" style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 0.5rem; font-family: inherit;">
+                    </div>
+                    <button type="submit" class="add-task-btn">Add Task</button>
+                </form>
+            </div>
+
+            <!-- Filter and Sort Controls -->
+            <div class="card mb-4">
+                <h3 class="text-lg font-bold text-secondary mb-3">🔍 Filter & Sort</h3>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <select id="filter-priority" style="padding: 0.5rem; border: 2px solid #ddd; border-radius: 0.5rem; font-family: inherit;">
+                        <option value="all">All Priorities</option>
+                        <option value="urgent">High Priority Only</option>
+                        <option value="warning">Medium Priority Only</option>
+                        <option value="normal">Normal Priority Only</option>
+                    </select>
+                    <select id="filter-status" style="padding: 0.5rem; border: 2px solid #ddd; border-radius: 0.5rem; font-family: inherit;">
+                        <option value="all">All Tasks</option>
+                        <option value="pending">Pending Tasks</option>
+                        <option value="completed">Completed Tasks</option>
+                    </select>
+                    <button onclick="clearCompletedTasks()" style="padding: 0.5rem 1rem; background: var(--error-red); color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-family: inherit;">
+                        🗑️ Clear Completed
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tasks List -->
+            <div class="card">
+                <h3 class="text-lg font-bold text-secondary mb-3">📝 My Tasks</h3>
+                <div id="tasks-container">
+                    <!-- Sample tasks will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Word Puzzle Game Modal -->
+        <div id="word-puzzle-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold text-primary mb-4">Word Puzzle Game</h3>
+                <div id="word-puzzle-game" class="text-center">
+                    <p class="mb-4">Unscramble this word:</p>
+                    <p id="scrambled-word" class="text-3xl font-bold text-secondary mb-4">LOADING...</p>
+                    <input type="text" id="word-guess" placeholder="Your answer" class="text-center text-lg mb-4">
+                    <div class="flex gap-2 mb-4">
+                        <button onclick="checkWordGuess()" class="btn btn-primary flex-1">Submit</button>
+                        <button onclick="newWordPuzzle()" class="btn btn-secondary flex-1">New Word</button>
+                    </div>
+                    <p id="word-result" class="mb-4"></p>
+                    <div class="text-sm text-gray-600">
+                        <p>Knowledge Coins: <span id="word-score">0</span> | Correct: <span id="word-correct">0</span></p>
+                    </div>
+                </div>
+                <button onclick="closeWordPuzzle()" class="btn btn-danger w-full mt-4">Close Game</button>
+            </div>
+        </div>
+
+        <!-- Speed Math Game Modal -->
+        <div id="speed-math-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold text-primary mb-4">Speed Math Race</h3>
+                <div id="math-setup" class="text-center">
+                    <p class="mb-4">Set your time limit:</p>
+                    <input type="number" id="math-time-limit" value="60" min="30" max="300" class="text-center mb-4">
+                    <p class="text-sm mb-4">seconds (30-300)</p>
+                    <button onclick="startMathRace()" class="btn btn-primary w-full">Start Race!</button>
+                </div>
+                <div id="math-game" class="text-center hidden">
+                    <div class="mb-4">
+                        <p class="text-lg">Time: <span id="math-timer">60</span>s | Knowledge Coins: <span id="math-score">0</span></p>
+                    </div>
+                    <p id="math-problem" class="text-3xl font-bold text-secondary mb-4">2 + 3 = ?</p>
+                    <input type="number" id="math-answer" placeholder="Your answer" class="text-center text-lg mb-4">
+                    <button onclick="submitMathAnswer()" class="btn btn-primary w-full mb-2">Submit</button>
+                    <p id="math-feedback" class="text-sm"></p>
+                </div>
+                <div id="math-results" class="text-center hidden">
+                    <h4 class="text-xl font-bold mb-4">Game Over!</h4>
+                    <p class="text-lg mb-2">Final Knowledge Coins: <span id="final-math-score">0</span></p>
+                    <p class="text-sm mb-4">Correct Answers: <span id="final-math-correct">0</span></p>
+                    <button onclick="resetMathGame()" class="btn btn-secondary w-full">Play Again</button>
+                </div>
+                <button onclick="closeMathGame()" class="btn btn-danger w-full mt-4">Close Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-primary mb-4">Profile Settings</h3>
+            <div class="flex flex-col gap-4">
+                <button id="change-password-btn" class="btn btn-secondary w-full">Change Password</button>
+                <button id="change-username-btn" class="btn btn-secondary w-full">Change Username</button>
+                <button id="delete-account-btn" class="btn btn-danger w-full">Delete Account</button>
+                <button id="close-profile-modal" class="btn btn-primary w-full">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="password-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-primary mb-4">Change Password</h3>
+            <form id="change-password-form" class="flex flex-col gap-4">
+                <input type="password" id="old-password" placeholder="Current Password" required>
+                <input type="password" id="new-password" placeholder="New Password" required>
+                <input type="password" id="confirm-new-password" placeholder="Confirm New Password" required>
+                <p id="password-message" class="text-sm text-center hidden"></p>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary w-full">Save</button>
+                    <button type="button" id="cancel-password-change" class="btn btn-secondary w-full">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Username Modal -->
+    <div id="username-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-primary mb-4">Change Username</h3>
+            <form id="change-username-form" class="flex flex-col gap-4">
+                <input type="text" id="new-username" placeholder="New Username" required>
+                <input type="password" id="confirm-password-username" placeholder="Confirm Password" required>
+                <p id="username-message" class="text-sm text-center hidden"></p>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary w-full">Save</button>
+                    <button type="button" id="cancel-username-change" class="btn btn-secondary w-full">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Maths Trivia Modal -->
+    <div id="math-trivia-modal" class="modal hidden">
+        <div class="modal-content trivia-game-container">
+            <div class="trivia-header">Math Facts Trivia!</div>
+            <div class="trivia-robot-icon">🤖</div>
+            <div id="math-content" class="trivia-content">
+                <p>Hi there! I'm Math-Bot, ready to teach you some cool facts about numbers! Ready to learn?</p>
+            </div>
+            <div class="voice-controls">
+                <button onclick="stopSpeaking()" class="btn btn-danger py-2 px-4 rounded-full">🔇 Stop</button>
+                <button onclick="speakText(document.getElementById('math-content').textContent)" class="btn btn-secondary py-2 px-4 rounded-full">🔊 Listen</button>
+            </div>
+            <div id="math-score-and-progress" class="hidden flex justify-between w-full px-4 mb-4">
+                <div id="math-score-display" class="trivia-score-display">Knowledge Coins: 0</div>
+                <div id="math-progress-display" class="trivia-progress-display">Question 1 of 6</div>
+            </div>
+            <button id="math-start-button" class="trivia-button">Let's Get Started!</button>
+            <div id="math-quiz-area" class="hidden w-full">
+                <div id="math-choices-grid" class="trivia-choices-grid"></div>
+                <div id="math-message"></div>
+                <button id="math-next-button" class="hidden trivia-button">Next Question!</button>
+            </div>
+            <button onclick="closeMathTrivia()" class="btn btn-danger w-full mt-4">Close Game</button>
+        </div>
+    </div>
+
+    <!-- GK Trivia Modal -->
+    <div id="gk-trivia-modal" class="modal hidden">
+        <div class="modal-content trivia-game-container">
+            <div class="trivia-header">G.K. Quiz!</div>
+            <div class="trivia-robot-icon">🌍</div>
+            <div id="gk-content" class="trivia-content">
+                <p>Hey there, Knowledge Seeker! I'm here to teach you some amazing facts about our world. Are you ready?</p>
+            </div>
+            <div class="voice-controls">
+                <button onclick="stopSpeaking()" class="btn btn-danger py-2 px-4 rounded-full">🔇 Stop</button>
+                <button onclick="speakText(document.getElementById('gk-content').textContent)" class="btn btn-secondary py-2 px-4 rounded-full">🔊 Listen</button>
+            </div>
+            <div id="gk-score-and-progress" class="hidden flex justify-between w-full px-4 mb-4">
+                <div id="gk-score-display" class="trivia-score-display">Knowledge Coins: 0</div>
+                <div id="gk-progress-display" class="trivia-progress-display">Question 1 of 6</div>
+            </div>
+            <button id="gk-start-button" class="trivia-button">Let's Go!</button>
+            <div id="gk-quiz-area" class="hidden w-full">
+                <div id="gk-choices-grid" class="trivia-choices-grid"></div>
+                <div id="gk-message"></div>
+                <button id="gk-next-button" class="hidden trivia-button">Next Question!</button>
+            </div>
+            <button onclick="closeGKTrivia()" class="btn btn-danger w-full mt-4">Close Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let totalKnowledgeCoins = 0;
+
+        // Utility functions
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('users')) || {};
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem('currentUser'));
+        }
+
+        function saveCurrentUser(user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        }
+
+        function getAssignments() {
+            return JSON.parse(localStorage.getItem('assignments')) || [];
+        }
+
+        function getNotes() {
+            return JSON.parse(localStorage.getItem('notes')) || [];
+        }
+
+        function getMarks() {
+            return JSON.parse(localStorage.getItem('marks')) || {};
+        }
+
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+                element.classList.add('text-error');
+            }
+        }
+
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+                element.classList.add('text-success');
+            }
+        }
+
+        function clearMessage(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = '';
+                element.classList.add('hidden');
+                element.classList.remove('text-error', 'text-success');
+            }
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+            
+            // Load tab content
+            loadTabContent(tabName);
+        }
+
+        function loadTabContent(tabName) {
+            switch(tabName) {
+                case 'overview':
+                    loadOverview();
+                    break;
+                case 'assignments':
+                    loadAssignments();
+                    break;
+                case 'notes':
+                    loadNotes();
+                    break;
+                case 'marks':
+                    loadMarks();
+                    break;
+                case 'games':
+                    // Games tab doesn't need dynamic loading
+                    break;
+                case 'avatars':
+                    loadAvatars();
+                    break;
+                case 'daily-quotes':
+                    loadDailyQuote();
+                    break;
+                case 'my-streak':
+                    loadStreakData();
+                    break;
+                case 'upcoming-tasks':
+                    loadUpcomingTasks();
+                    break;
+            }
+        }
+
+        function loadOverview() {
+            const assignments = getAssignments();
+            const notes = getNotes();
+            const marks = getMarks();
+            const userMarks = marks[currentUser.username] || [];
+
+            document.getElementById('assignments-count').textContent = assignments.length;
+            document.getElementById('notes-count').textContent = notes.length;
+            document.getElementById('marks-count').textContent = userMarks.length;
+
+            // Load streak and usage data
+            const streakData = getStreakData();
+            document.getElementById('current-streak').textContent = streakData.currentStreak;
+            
+            const usageData = getUsageData();
+            const todayUsage = Math.floor(usageData.todayUsage / 60);
+            document.getElementById('usage-time').textContent = `${todayUsage}m`;
+
+            // Load knowledge coins and daily quote preview
+            loadKnowledgeCoins();
+            loadDailyQuotePreview();
+        }
+
+        function loadAssignments() {
+            const assignments = getAssignments();
+            const container = document.getElementById('assignments-list');
+            
+            if (assignments.length === 0) {
+                container.innerHTML = '<div class="card"><p class="text-center">No assignments available yet.</p></div>';
+                return;
+            }
+
+            container.innerHTML = assignments.map(assignment => `
+                <div class="card">
+                    <h3 class="text-xl font-bold text-primary">${assignment.title}</h3>
+                    <p class="text-secondary mb-2">Subject: ${assignment.subject}</p>
+                    <p class="text-sm">Due Date: ${assignment.dueDate}</p>
+                    ${assignment.description ? `<p class="mt-2">${assignment.description}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function loadNotes() {
+            const notes = getNotes();
+            const container = document.getElementById('notes-list');
+            
+            if (notes.length === 0) {
+                container.innerHTML = '<div class="card"><p class="text-center">No notes available yet.</p></div>';
+                return;
+            }
+
+            container.innerHTML = notes.map(note => `
+                <div class="card">
+                    <h3 class="text-xl font-bold text-primary">${note.title}</h3>
+                    <p class="mt-2">${note.content}</p>
+                </div>
+            `).join('');
+        }
+
+        function loadMarks() {
+            const marks = getMarks();
+            const userMarks = marks[currentUser.username] || [];
+            const container = document.getElementById('marks-list');
+            
+            if (userMarks.length === 0) {
+                container.innerHTML = '<div class="card"><p class="text-center">No marks available yet.</p></div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${userMarks.map(mark => `
+                                <tr>
+                                    <td>${mark.subject}</td>
+                                    <td>${mark.score}/100</td>
+                                    <td class="font-bold ${getGradeColor(mark.score)}">${getGrade(mark.score)}</td>
+                                    <td>${mark.date || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function getGrade(score) {
+            if (score >= 90) return 'A+';
+            if (score >= 80) return 'A';
+            if (score >= 70) return 'B';
+            if (score >= 60) return 'C';
+            if (score >= 50) return 'D';
+            return 'F';
+        }
+
+        function getGradeColor(score) {
+            if (score >= 80) return 'text-success';
+            if (score >= 60) return 'text-warning';
+            return 'text-error';
+        }
+
+        function openMemoryGame() {
+            markDailyGoal('goal-game');
+            
+            // Track games played
+            const usageData = getUsageData();
+            usageData.gamesPlayed++;
+            saveUsageData(usageData);
+            
+            // This game is external, so it can't update coins directly. 
+            // We'd need to store score from an external source.
+            // For now, let's just assume some coins are earned to demonstrate the system.
+            // In a real app, this would be handled differently.
+            // updateKnowledgeCoins(Math.floor(Math.random() * 50)); 
+            
+            window.open('Memorymatch.html', '_blank');
+        }
+
+        function changePassword() {
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-new-password').value;
+
+            if (oldPassword !== currentUser.password) {
+                showError('password-message', 'Current password is incorrect.');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showError('password-message', 'New passwords do not match.');
+                return;
+            }
+
+            const users = getUsers();
+            users[currentUser.username].password = newPassword;
+            saveUsers(users);
+            
+            currentUser.password = newPassword;
+            saveCurrentUser(currentUser);
+
+            showSuccess('password-message', 'Password changed successfully!');
+            setTimeout(() => {
+                document.getElementById('password-modal').classList.add('hidden');
+                document.getElementById('change-password-form').reset();
+                clearMessage('password-message');
+            }, 2000);
+        }
+
+        function changeUsername() {
+            const newUsername = document.getElementById('new-username').value;
+            const confirmPassword = document.getElementById('confirm-password-username').value;
+
+            if (confirmPassword !== currentUser.password) {
+                showError('username-message', 'Password is incorrect.');
+                return;
+            }
+
+            const users = getUsers();
+            if (users[newUsername]) {
+                showError('username-message', 'Username is already taken.');
+                return;
+            }
+
+            const oldUsername = currentUser.username;
+            const userData = users[oldUsername];
+            
+            // Update username in users
+            delete users[oldUsername];
+            users[newUsername] = userData;
+            saveUsers(users);
+            
+            // Update marks
+            const marks = getMarks();
+            if (marks[oldUsername]) {
+                marks[newUsername] = marks[oldUsername];
+                delete marks[oldUsername];
+                localStorage.setItem('marks', JSON.stringify(marks));
+            }
+            
+            // Update current user
+            currentUser.username = newUsername;
+            saveCurrentUser(currentUser);
+
+            showSuccess('username-message', 'Username changed successfully!');
+            setTimeout(() => {
+                document.getElementById('username-modal').classList.add('hidden');
+                document.getElementById('change-username-form').reset();
+                clearMessage('username-message');
+                document.getElementById('student-welcome').textContent = `Welcome, ${currentUser.name}!`;
+            }, 2000);
+        }
+
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                const users = getUsers();
+                const username = currentUser.username;
+                
+                // Remove user data
+                delete users[username];
+                saveUsers(users);
+                
+                // Clean up marks
+                const marks = getMarks();
+                delete marks[username];
+                localStorage.setItem('marks', JSON.stringify(marks));
+
+                alert('Your account has been deleted.');
+                logout();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            currentUser = getCurrentUser();
+            if (!currentUser || currentUser.role !== 'student') {
+                alert('Access denied. Please log in as a student.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Setup UI
+            document.getElementById('student-welcome').textContent = `Welcome, ${currentUser.name}!`;
+            
+            // Load initial content
+            loadOverview();
+
+            // Setup event listeners
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            
+            // Profile modal events
+            document.getElementById('profile-btn').addEventListener('click', function() {
+                document.getElementById('profile-modal').classList.remove('hidden');
+            });
+            
+            document.getElementById('close-profile-modal').addEventListener('click', function() {
+                document.getElementById('profile-modal').classList.add('hidden');
+            });
+            
+            // Password change events
+            document.getElementById('change-password-btn').addEventListener('click', function() {
+                document.getElementById('profile-modal').classList.add('hidden');
+                document.getElementById('password-modal').classList.remove('hidden');
+            });
+            
+            document.getElementById('cancel-password-change').addEventListener('click', function() {
+                document.getElementById('password-modal').classList.add('hidden');
+                clearMessage('password-message');
+            });
+            
+            document.getElementById('change-password-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                changePassword();
+            });
+            
+            // Username change events
+            document.getElementById('change-username-btn').addEventListener('click', function() {
+                document.getElementById('profile-modal').classList.add('hidden');
+                document.getElementById('username-modal').classList.remove('hidden');
+            });
+            
+            document.getElementById('cancel-username-change').addEventListener('click', function() {
+                document.getElementById('username-modal').classList.add('hidden');
+                clearMessage('username-message');
+            });
+            
+            document.getElementById('change-username-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                changeUsername();
+            });
+            
+            // Delete account
+            document.getElementById('delete-account-btn').addEventListener('click', deleteAccount);
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.classList.add('hidden');
+                }
+            });
+
+            // Initialize usage tracking
+            initializeUsageTracking();
+            updateStreak();
+        });
+
+        // ============================================================================
+        // NEW FEATURES: GAMES, QUOTES, STREAK, AND USAGE TRACKING
+        // ============================================================================
+
+        // Usage Tracking System
+        let usageStartTime = Date.now();
+        let usageTimer;
+
+        function initializeUsageTracking() {
+            usageStartTime = Date.now();
+            
+            // Update usage every 10 seconds
+            usageTimer = setInterval(updateUsageTime, 10000);
+            
+            // Save usage when page is about to close
+            window.addEventListener('beforeunload', saveUsageTime);
+            
+            // Track daily goals
+            markDailyGoal('goal-login');
+        }
+
+        function updateUsageTime() {
+            const currentTime = Date.now();
+            const sessionTime = Math.floor((currentTime - usageStartTime) / 1000);
+            
+            const usageData = getUsageData();
+            usageData.todayUsage += 10; // Add 10 seconds
+            usageData.totalUsage += 10;
+            saveUsageData(usageData);
+            
+            // Update display
+            const todayUsage = Math.floor(usageData.todayUsage / 60);
+            const elements = document.querySelectorAll('#usage-time, #today-usage-time');
+            elements.forEach(el => {
+                if (el.id === 'usage-time') {
+                    el.textContent = `${todayUsage}m`;
+                } else {
+                    el.textContent = `${todayUsage} minutes`;
+                }
+            });
+        }
+
+        function saveUsageTime() {
+            clearInterval(usageTimer);
+            const currentTime = Date.now();
+            const sessionTime = Math.floor((currentTime - usageStartTime) / 1000);
+            
+            const usageData = getUsageData();
+            usageData.todayUsage += sessionTime;
+            usageData.totalUsage += sessionTime;
+            saveUsageData(usageData);
+        }
+
+        function getUsageData() {
+            const today = new Date().toDateString();
+            let usageData = JSON.parse(localStorage.getItem('usageData')) || {
+                todayUsage: 0,
+                totalUsage: 0,
+                lastDate: today,
+                dailyGoals: {},
+                gamesPlayed: 0,
+                assignmentsViewed: 0
+            };
+
+            // Reset daily data if it's a new day
+            if (usageData.lastDate !== today) {
+                usageData.todayUsage = 0;
+                usageData.lastDate = today;
+                usageData.dailyGoals = {};
+                usageData.gamesPlayed = 0;
+                usageData.assignmentsViewed = 0;
+            }
+
+            return usageData;
+        }
+
+        function saveUsageData(data) {
+            localStorage.setItem('usageData', JSON.stringify(data));
+        }
+
+        // Streak System
+        function getStreakData() {
+            const today = new Date().toDateString();
+            let streakData = JSON.parse(localStorage.getItem('streakData')) || {
+                currentStreak: 0,
+                longestStreak: 0,
+                lastLoginDate: null,
+                totalActiveDays: 0
+            };
+
+            return streakData;
+        }
+
+        function saveStreakData(data) {
+            localStorage.setItem('streakData', JSON.stringify(data));
+        }
+
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toDateString();
+
+            let streakData = getStreakData();
+
+            if (streakData.lastLoginDate === today) {
+                // Already logged in today, no change needed
+                return;
+            }
+
+            if (streakData.lastLoginDate === yesterdayString) {
+                // Consecutive day login
+                streakData.currentStreak++;
+            } else if (streakData.lastLoginDate !== null) {
+                // Streak broken
+                streakData.currentStreak = 1;
+            } else {
+                // First time login
+                streakData.currentStreak = 1;
+            }
+
+            streakData.lastLoginDate = today;
+            streakData.totalActiveDays++;
+            
+            if (streakData.currentStreak > streakData.longestStreak) {
+                streakData.longestStreak = streakData.currentStreak;
+            }
+
+            saveStreakData(streakData);
+        }
+
+        function loadStreakData() {
+            const streakData = getStreakData();
+            const usageData = getUsageData();
+
+            document.getElementById('streak-display').textContent = `${streakData.currentStreak}🔥`;
+            document.getElementById('total-login-days').textContent = streakData.totalActiveDays;
+            
+            const totalHours = Math.floor(usageData.totalUsage / 3600);
+            document.getElementById('total-usage-time').textContent = `${totalHours}h`;
+            
+            const todayMinutes = Math.floor(usageData.todayUsage / 60);
+            document.getElementById('today-usage-time').textContent = `${todayMinutes} minutes`;
+            document.getElementById('today-assignments-viewed').textContent = usageData.assignmentsViewed;
+            document.getElementById('today-games-played').textContent = usageData.gamesPlayed;
+        }
+
+        // Daily Goals System
+        function markDailyGoal(goalId) {
+            const usageData = getUsageData();
+            usageData.dailyGoals[goalId] = true;
+            saveUsageData(usageData);
+            
+            const checkbox = document.getElementById(goalId);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        }
+
+        function loadDailyGoals() {
+            const usageData = getUsageData();
+            Object.keys(usageData.dailyGoals).forEach(goalId => {
+                const checkbox = document.getElementById(goalId);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        // Daily Quotes System
+        const inspirationalQuotes = [
+            { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+            { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
+            { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+            { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+            { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+            { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+            { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+            { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+            { text: "Innovation distinguishes between a leader and a follower.", author: "Steve Jobs" },
+            { text: "Learning never exhausts the mind.", author: "Leonardo da Vinci" },
+            { text: "The more that you read, the more things you will know.", author: "Dr. Seuss" },
+            { text: "Intelligence plus character—that is the goal of true education.", author: "Martin Luther King Jr." }
+        ];
+
+        function getTodayQuote() {
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            return inspirationalQuotes[dayOfYear % inspirationalQuotes.length];
+        }
+
+        function loadDailyQuotePreview() {
+            const quote = getTodayQuote();
+            document.getElementById('quote-text').textContent = `"${quote.text}"`;
+            document.getElementById('quote-author').textContent = `- ${quote.author}`;
+        }
+
+        function loadDailyQuote() {
+            const quote = getTodayQuote();
+            document.getElementById('main-quote-text').textContent = `"${quote.text}"`;
+            document.getElementById('main-quote-author').textContent = `- ${quote.author}`;
+            loadSavedQuotes();
+        }
+
+        function generateNewQuote() {
+            const randomQuote = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
+            document.getElementById('main-quote-text').textContent = `"${randomQuote.text}"`;
+            document.getElementById('main-quote-author').textContent = `- ${randomQuote.author}`;
+            
+            // Save to collection
+            let savedQuotes = JSON.parse(localStorage.getItem('savedQuotes')) || [];
+            savedQuotes.push(randomQuote);
+            localStorage.setItem('savedQuotes', JSON.stringify(savedQuotes));
+            loadSavedQuotes();
+        }
+
+        function loadSavedQuotes() {
+            const savedQuotes = JSON.parse(localStorage.getItem('savedQuotes')) || [];
+            const container = document.getElementById('saved-quotes-list');
+            
+            if (savedQuotes.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500">No saved quotes yet. Generate some quotes to start your collection!</p>';
+                return;
+            }
+
+            container.innerHTML = savedQuotes.slice(-5).map(quote => `
+                <div class="mb-4 p-3 bg-gray-100 rounded">
+                    <p class="italic">"${quote.text}"</p>
+                    <p class="text-sm text-gray-600 mt-2">- ${quote.author}</p>
+                </div>
+            `).join('');
+        }
+
+        // Todo List System
+        function loadUpcomingTasks() {
+            loadTasks();
+            setupTaskFilters();
+            setupTaskForm();
+            
+            // Load default goals
+            if (!localStorage.getItem('userTasks')) {
+                const defaultTasks = [
+                    {
+                        id: 'task-1',
+                        title: 'Complete Math Homework',
+                        description: 'Algebra problems from chapter 5',
+                        priority: 'urgent',
+                        dueDate: new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0],
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'task-2',
+                        title: 'Study for Science Test',
+                        description: 'Review chapters 1-3 on Biology',
+                        priority: 'warning',
+                        dueDate: new Date(Date.now() + 3*24*60*60*1000).toISOString().split('T')[0],
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'task-3',
+                        title: 'Read Chapter 4',
+                        description: 'English Literature assignment',
+                        priority: 'normal',
+                        dueDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0],
+                        completed: true,
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                localStorage.setItem('userTasks', JSON.stringify(defaultTasks));
+                loadTasks();
+            }
+        }
+
+        function getTasks() {
+            return JSON.parse(localStorage.getItem('userTasks')) || [];
+        }
+
+        function saveTasks(tasks) {
+            localStorage.setItem('userTasks', JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            const tasks = getTasks();
+            const container = document.getElementById('tasks-container');
+            
+            if (tasks.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500">No tasks yet. Add your first task above!</p>';
+                return;
+            }
+
+            // Apply filters
+            const priorityFilter = document.getElementById('filter-priority')?.value || 'all';
+            const statusFilter = document.getElementById('filter-status')?.value || 'all';
+
+            let filteredTasks = tasks;
+            
+            if (priorityFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
+            }
+            
+            if (statusFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => 
+                    statusFilter === 'completed' ? task.completed : !task.completed
+                );
+            }
+
+            // Sort by priority and due date
+            filteredTasks.sort((a, b) => {
+                const priorityOrder = { urgent: 3, warning: 2, normal: 1 };
+                if (a.priority !== b.priority) {
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                }
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            });
+
+            container.innerHTML = filteredTasks.map(task => {
+                const dueDate = new Date(task.dueDate);
+                const today = new Date();
+                const isOverdue = dueDate < today && !task.completed;
+                const daysUntil = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                
+                let dueDateText = '';
+                if (isOverdue) {
+                    dueDateText = `<span style="color: var(--error-red);">⚠️ Overdue by ${Math.abs(daysUntil)} day(s)</span>`;
+                } else if (daysUntil === 0) {
+                    dueDateText = '<span style="color: var(--warning-yellow);">📅 Due Today</span>';
+                } else if (daysUntil === 1) {
+                    dueDateText = '<span style="color: var(--warning-yellow);">📅 Due Tomorrow</span>';
+                } else {
+                    dueDateText = `📅 Due in ${daysUntil} day(s)`;
+                }
+
+                const priorityEmoji = { urgent: '🔴', warning: '🟡', normal: '🟢' };
+
+                return `
+                    <div class="task-item ${task.priority} ${task.completed ? 'opacity-75' : ''}" data-task-id="${task.id}">
+                        <span class="task-priority ${task.priority}">${priorityEmoji[task.priority]} ${task.priority.toUpperCase()}</span>
+                        
+                        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                                   onchange="toggleTaskComplete('${task.id}')" 
+                                   style="width: 1.25rem; height: 1.25rem; margin-top: 0.25rem; accent-color: var(--primary-blue);">
+                            
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem; ${task.completed ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${task.title}</h4>
+                                <p style="color: #666; margin-bottom: 0.5rem; ${task.completed ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${task.description}</p>
+                                <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">${dueDateText}</div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="editTask('${task.id}')" style="background: var(--primary-blue); color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer; font-size: 0.8rem;">
+                                    ✏️ Edit
+                                </button>
+                                <button onclick="deleteTask('${task.id}')" style="background: var(--error-red); color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer; font-size: 0.8rem;">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setupTaskFilters() {
+            const priorityFilter = document.getElementById('filter-priority');
+            const statusFilter = document.getElementById('filter-status');
+            
+            if (priorityFilter) {
+                priorityFilter.addEventListener('change', loadTasks);
+            }
+            if (statusFilter) {
+                statusFilter.addEventListener('change', loadTasks);
+            }
+        }
+
+        function setupTaskForm() {
+            const form = document.getElementById('add-task-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const title = document.getElementById('task-title').value.trim();
+                    const description = document.getElementById('task-description').value.trim();
+                    const priority = document.getElementById('task-priority').value;
+                    const dueDate = document.getElementById('task-due-date').value;
+                    
+                    if (!title) {
+                        alert('Please enter a task title!');
+                        return;
+                    }
+                    
+                    if (!dueDate) {
+                        alert('Please select a due date!');
+                        return;
+                    }
+                    
+                    const tasks = getTasks();
+                    const newTask = {
+                        id: 'task-' + Date.now(),
+                        title,
+                        description: description || 'No description provided',
+                        priority,
+                        dueDate,
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    tasks.push(newTask);
+                    saveTasks(tasks);
+                    loadTasks();
+                    
+                    // Reset form
+                    form.reset();
+                    
+                    // Show success message
+                    alert('Task added successfully! 🎉');
+                });
+            }
+        }
+
+        function toggleTaskComplete(taskId) {
+            const tasks = getTasks();
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+                task.completedAt = task.completed ? new Date().toISOString() : null;
+                saveTasks(tasks);
+                loadTasks();
+                
+                // Update streak if task completed
+                if (task.completed) {
+                    updateStreak();
+                }
+            }
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                const tasks = getTasks();
+                const filteredTasks = tasks.filter(t => t.id !== taskId);
+                saveTasks(filteredTasks);
+                loadTasks();
+            }
+        }
+
+        function editTask(taskId) {
+            const tasks = getTasks();
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const newTitle = prompt('Edit task title:', task.title);
+            if (newTitle === null) return;
+            
+            const newDescription = prompt('Edit task description:', task.description);
+            if (newDescription === null) return;
+            
+            const newPriority = prompt('Edit priority (normal/warning/urgent):', task.priority);
+            if (newPriority === null || !['normal', 'warning', 'urgent'].includes(newPriority)) return;
+            
+            const newDueDate = prompt('Edit due date (YYYY-MM-DD):', task.dueDate);
+            if (newDueDate === null) return;
+            
+            task.title = newTitle.trim() || task.title;
+            task.description = newDescription.trim() || task.description;
+            task.priority = newPriority;
+            task.dueDate = newDueDate;
+            task.updatedAt = new Date().toISOString();
+            
+            saveTasks(tasks);
+            loadTasks();
+        }
+
+        function clearCompletedTasks() {
+            if (confirm('Are you sure you want to delete all completed tasks?')) {
+                const tasks = getTasks();
+                const incompleteTasks = tasks.filter(t => !t.completed);
+                saveTasks(incompleteTasks);
+                loadTasks();
+            }
+        }
+
+        // Word Puzzle Game
+        const wordPuzzleWords = [
+            "EDUCATION", "LEARNING", "STUDENT", "TEACHER", "HOMEWORK", "SCIENCE", "MATHEMATICS", 
+            "HISTORY", "GEOGRAPHY", "LITERATURE", "COMPUTER", "PROGRAMMING", "KNOWLEDGE", 
+            "CREATIVITY", "IMAGINATION", "DISCOVERY", "RESEARCH", "EXPERIMENT", "LIBRARY", "BOOK"
+        ];
+
+        let currentWord = '';
+        let scrambledWord = '';
+        let wordScore = 0;
+        let wordCorrect = 0;
+
+        function showWordPuzzleGame() {
+            document.getElementById('word-puzzle-modal').classList.remove('hidden');
+            newWordPuzzle();
+            markDailyGoal('goal-game');
+            
+            // Track games played
+            const usageData = getUsageData();
+            usageData.gamesPlayed++;
+            saveUsageData(usageData);
+        }
+
+        function closeWordPuzzle() {
+            // Update total coins before closing the game
+            updateKnowledgeCoins(wordScore);
+            wordScore = 0; // Reset score for the next game
+            document.getElementById('word-puzzle-modal').classList.add('hidden');
+        }
+
+        function newWordPuzzle() {
+            currentWord = wordPuzzleWords[Math.floor(Math.random() * wordPuzzleWords.length)];
+            scrambledWord = scrambleWord(currentWord);
+            
+            document.getElementById('scrambled-word').textContent = scrambledWord;
+            document.getElementById('word-guess').value = '';
+            document.getElementById('word-result').textContent = '';
+        }
+
+        function scrambleWord(word) {
+            const letters = word.split('');
+            for (let i = letters.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [letters[i], letters[j]] = [letters[j], letters[i]];
+            }
+            return letters.join('');
+        }
+
+        function checkWordGuess() {
+            const guess = document.getElementById('word-guess').value.toUpperCase();
+            const resultElement = document.getElementById('word-result');
+            
+            if (guess === currentWord) {
+                wordScore += 10;
+                wordCorrect++;
+                resultElement.textContent = '🎉 Correct! Well done!';
+                resultElement.className = 'text-success mb-4';
+                setTimeout(newWordPuzzle, 1500);
+            } else {
+                resultElement.textContent = `❌ Try again! The word was: ${currentWord}`;
+                resultElement.className = 'text-error mb-4';
+            }
+            
+            document.getElementById('word-score').textContent = wordScore;
+            document.getElementById('word-correct').textContent = wordCorrect;
+        }
+
+        // Speed Math Game
+        let mathTimer;
+        let mathTimeLeft = 60;
+        let mathScore = 0;
+        let mathCorrect = 0;
+        let currentMathProblem = {};
+
+        function showSpeedMathGame() {
+            document.getElementById('speed-math-modal').classList.remove('hidden');
+            resetMathGame();
+            markDailyGoal('goal-game');
+            
+            // Track games played
+            const usageData = getUsageData();
+            usageData.gamesPlayed++;
+            saveUsageData(usageData);
+        }
+
+        function closeMathGame() {
+            // Update total coins before closing the game
+            updateKnowledgeCoins(mathScore);
+            mathScore = 0; // Reset score for the next game
+            document.getElementById('speed-math-modal').classList.add('hidden');
+            clearInterval(mathTimer);
+        }
+
+        function startMathRace() {
+            const timeLimit = parseInt(document.getElementById('math-time-limit').value);
+            if (timeLimit < 30 || timeLimit > 300) {
+                alert('Please enter a time between 30 and 300 seconds.');
+                return;
+            }
+            
+            mathTimeLeft = timeLimit;
+            mathScore = 0;
+            mathCorrect = 0;
+            
+            document.getElementById('math-setup').classList.add('hidden');
+            document.getElementById('math-game').classList.remove('hidden');
+            document.getElementById('math-results').classList.add('hidden');
+            
+            generateMathProblem();
+            startMathTimer();
+            document.getElementById('math-answer').focus();
+        }
+
+        function generateMathProblem() {
+            const operators = ['+', '-', '*'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+            let num1, num2, answer;
+            
+            if (operator === '*') {
+                num1 = Math.floor(Math.random() * 12) + 1;
+                num2 = Math.floor(Math.random() * 12) + 1;
+                answer = num1 * num2;
+            } else if (operator === '+') {
+                num1 = Math.floor(Math.random() * 50) + 1;
+                num2 = Math.floor(Math.random() * 50) + 1;
+                answer = num1 + num2;
+            } else { // subtraction
+                num1 = Math.floor(Math.random() * 50) + 25;
+                num2 = Math.floor(Math.random() * 25) + 1;
+                answer = num1 - num2;
+            }
+            
+            currentMathProblem = { num1, num2, operator, answer };
+            document.getElementById('math-problem').textContent = `${num1} ${operator} ${num2} = ?`;
+            document.getElementById('math-answer').value = '';
+        }
+
+        function submitMathAnswer() {
+            const userAnswer = parseInt(document.getElementById('math-answer').value);
+            const feedback = document.getElementById('math-feedback');
+            
+            if (userAnswer === currentMathProblem.answer) {
+                mathScore += 10;
+                mathCorrect++;
+                feedback.textContent = '✅ Correct!';
+                feedback.className = 'text-success text-sm';
+            } else {
+                feedback.textContent = `❌ Wrong! Answer: ${currentMathProblem.answer}`;
+                feedback.className = 'text-error text-sm';
+            }
+            
+            document.getElementById('math-score').textContent = mathScore;
+            setTimeout(() => {
+                generateMathProblem();
+                document.getElementById('math-feedback').textContent = '';
+                document.getElementById('math-answer').focus();
+            }, 1000);
+        }
+
+        function startMathTimer() {
+            mathTimer = setInterval(() => {
+                mathTimeLeft--;
+                document.getElementById('math-timer').textContent = mathTimeLeft;
+                
+                if (mathTimeLeft <= 0) {
+                    endMathGame();
+                }
+            }, 1000);
+        }
+
+        function endMathGame() {
+            clearInterval(mathTimer);
+            document.getElementById('math-game').classList.add('hidden');
+            document.getElementById('math-results').classList.remove('hidden');
+            
+            document.getElementById('final-math-score').textContent = mathScore;
+            document.getElementById('final-math-correct').textContent = mathCorrect;
+        }
+
+        function resetMathGame() {
+            clearInterval(mathTimer);
+            document.getElementById('math-setup').classList.remove('hidden');
+            document.getElementById('math-game').classList.add('hidden');
+            document.getElementById('math-results').classList.add('hidden');
+            document.getElementById('math-time-limit').value = 60;
+        }
+
+        // Enhanced Memory Game Function
+        function openMemoryGame() {
+            markDailyGoal('goal-game');
+            
+            // Track games played
+            const usageData = getUsageData();
+            usageData.gamesPlayed++;
+            saveUsageData(usageData);
+            
+            window.open('Memorymatch.html', '_blank');
+        }
+
+        // Enhanced assignment loading with tracking
+        const originalLoadAssignments = loadAssignments;
+        loadAssignments = function() {
+            originalLoadAssignments();
+            
+            // Track assignments viewed
+            const usageData = getUsageData();
+            usageData.assignmentsViewed++;
+            saveUsageData(usageData);
+            
+            markDailyGoal('goal-assignments');
+        };
+
+        // Keyboard event listeners for games
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (!document.getElementById('word-puzzle-modal').classList.contains('hidden')) {
+                    checkWordGuess();
+                } else if (!document.getElementById('speed-math-modal').classList.contains('hidden') && 
+                          !document.getElementById('math-game').classList.contains('hidden')) {
+                    submitMathAnswer();
+                }
+            }
+        }); 
+
+        // ============================================================================
+        // KNOWLEDGE COINS & BADGE SYSTEM LOGIC
+        // ============================================================================
+
+        const mathContentEl = document.getElementById('math-content');
+        const mathStartButton = document.getElementById('math-start-button');
+        const mathQuizArea = document.getElementById('math-quiz-area');
+        const mathChoicesGrid = document.getElementById('math-choices-grid');
+        const mathMessageEl = document.getElementById('math-message');
+        const mathNextButton = document.getElementById('math-next-button');
+        const mathScoreAndProgress = document.getElementById('math-score-and-progress');
+        const mathScoreDisplay = document.getElementById('math-score-display');
+        const mathProgressDisplay = document.getElementById('math-progress-display');
+        
+        const gkContentEl = document.getElementById('gk-content');
+        const gkStartButton = document.getElementById('gk-start-button');
+        const gkQuizArea = document.getElementById('gk-quiz-area');
+        const gkChoicesGrid = document.getElementById('gk-choices-grid');
+        const gkMessageEl = document.getElementById('gk-message');
+        const gkNextButton = document.getElementById('gk-next-button');
+        const gkScoreAndProgress = document.getElementById('gk-score-and-progress');
+        const gkScoreDisplay = document.getElementById('gk-score-display');
+        const gkProgressDisplay = document.getElementById('gk-progress-display');
+
+        const knowledgeCoinsDisplay = document.getElementById('knowledge-coins-display');
+
+        const badgeTiers = [
+            { name: 'Bronze', emoji: '🥉', color: '#cd7f32', threshold: 0 },
+            { name: 'Silver', emoji: '🥈', color: '#c0c0c0', threshold: 50 },
+            { name: 'Gold', emoji: '🥇', color: '#ffd700', threshold: 150 },
+            { name: 'Diamond', emoji: '💎', color: '#b9f2ff', threshold: 300 }
+        ];
+
+        function loadKnowledgeCoins() {
+            const savedCoins = localStorage.getItem('totalKnowledgeCoins');
+            if (savedCoins) {
+                totalKnowledgeCoins = parseInt(savedCoins);
+            } else {
+                totalKnowledgeCoins = 0;
+            }
+            knowledgeCoinsDisplay.textContent = totalKnowledgeCoins;
+            updateBadge(); // Initial call to display the badge on load
+        }
+
+        function updateKnowledgeCoins(amount) {
+            totalKnowledgeCoins += amount;
+            localStorage.setItem('totalKnowledgeCoins', totalKnowledgeCoins);
+            knowledgeCoinsDisplay.textContent = totalKnowledgeCoins;
+            updateBadge(); // Update the badge every time coins change
+        }
+
+        function updateBadge() {
+            const badgeDisplay = document.getElementById('badge-display');
+            const badgeEmoji = document.getElementById('badge-emoji');
+            const badgeName = document.getElementById('badge-name');
+            
+            // Find the correct badge based on current coins
+            let currentBadge = badgeTiers[0];
+            for (const badge of badgeTiers) {
+                if (totalKnowledgeCoins >= badge.threshold) {
+                    currentBadge = badge;
+                }
+            }
+            
+            badgeDisplay.style.backgroundColor = currentBadge.color;
+            badgeEmoji.textContent = currentBadge.emoji;
+            badgeName.textContent = currentBadge.name;
+        }
+
+        // Initialize knowledge coins on page load
+        document.addEventListener('DOMContentLoaded', loadKnowledgeCoins);
+
+        // ============================================================================
+        // TEXT-TO-SPEECH LOGIC
+        // ============================================================================
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+
+        function speakText(text) {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.voice = synth.getVoices().find(voice => voice.lang.startsWith('en'));
+            synth.speak(currentUtterance);
+        }
+
+        function stopSpeaking() {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+        }
+        
+        // ============================================================================
+        // MATHS TRIVIA LOGIC
+        // ============================================================================
+        const mathPraise = [
+            "Fantastic work! You've got it! 🌟",
+            "Amazing! That's a perfect answer! 🎉",
+            "You're a math whiz! Way to go! 🧠",
+            "Super job! That's 10 Knowledge Coins for you! ✨",
+            "Brilliant! Keep up the great work! 👍"
+        ];
+        
+        const mathFacts = [
+            { text: "A prime number is a number greater than one that can only be divided by one and itself. Examples are 2, 3, 5, 7, and 11." },
+            { text: "The order of operations is a set of rules used to solve math problems. The acronym PEMDAS helps you remember: Parentheses, Exponents, Multiplication and Division from left to right, Addition and Subtraction from left to right." },
+            { text: "The area of a rectangle is found by multiplying its length by its width. The formula is A = l x w." },
+            { text: "A right angle is an angle that measures exactly 90 degrees. It looks like the corner of a square!." },
+            { text: "A fraction represents a part of a whole. The top number is the numerator, and the bottom number is the denominator." },
+            { text: "The number pi is a special number that is approximately equal to 3.14. It is used to find the circumference and area of circles." }
+        ];
+
+        const mathQuestions = [
+            {
+                question: "Which of the following is a prime number?",
+                choices: ["4", "9", "7", "10"],
+                answer: "7"
+            },
+            {
+                question: "According to PEMDAS, which operation comes first?",
+                choices: ["Addition", "Subtraction", "Multiplication", "Parentheses"],
+                answer: "Parentheses"
+            },
+            {
+                question: "If a rectangle has a length of 5 and a width of 3, what is its area?",
+                choices: ["8", "15", "10", "25"],
+                answer: "15"
+            },
+            {
+                question: "What is an angle that measures exactly 90 degrees called?",
+                choices: ["An acute angle", "An obtuse angle", "A right angle", "A straight angle"],
+                answer: "A right angle"
+            },
+            {
+                question: "In the fraction 3/4, what is the number '3' called?",
+                choices: ["The denominator", "The divisor", "The numerator", "The quotient"],
+                answer: "The numerator"
+            },
+            {
+                question: "The value of pi is approximately...",
+                choices: ["1.618", "2.718", "3.14", "4.25"],
+                answer: "3.14"
+            }
+        ];
+
+        let mathCurrentFactIndex = 0;
+        let mathCurrentQuestionIndex = 0;
+        let mathIsLearningPhase = true;
+        let mathTriviaScore = 0;
+
+        function showMathTrivia() {
+            document.getElementById('math-trivia-modal').classList.remove('hidden');
+            document.getElementById('math-trivia-modal').style.display = 'flex';
+            markDailyGoal('goal-game');
+            const usageData = getUsageData();
+            usageData.gamesPlayed++;
+            saveUsageData(usageData);
+
+            // Reset game state
+            mathCurrentFactIndex = 0;
+            mathCurrentQuestionIndex = 0;
+            mathIsLearningPhase = true;
+            mathTriviaScore = 0;
+            document.getElementById('math-score-display').textContent = `Knowledge Coins: ${mathTriviaScore}`;
+
+
+            // Start the game flow
+            showMathNextContent();
+        }
+
+        function closeMathTrivia() {
+            stopSpeaking();
+            // Update total coins before closing the game
+            updateKnowledgeCoins(mathTriviaScore);
+
+            document.getElementById('math-trivia-modal').classList.add('hidden');
+            // Reset state
+            mathStartButton.textContent = "Let's Get Started!";
+            mathQuizArea.classList.add('hidden');
+            mathScoreAndProgress.classList.add('hidden');
+        }
+
+        function showMathNextContent() {
+            if (mathIsLearningPhase) {
+                if (mathCurrentFactIndex < mathFacts.length) {
+                    mathContentEl.innerHTML = `<p>${mathFacts[mathCurrentFactIndex].text}</p>`;
+                    speakText(mathFacts[mathCurrentFactIndex].text);
+                    mathCurrentFactIndex++;
+                    mathStartButton.textContent = "Next Fact";
+                } else {
+                    mathIsLearningPhase = false;
+                    mathContentEl.innerHTML = `<p>Time to test your knowledge! Let's see what you remember. 🤔</p>`;
+                    speakText("Time to test your knowledge! Let's see what you remember.");
+                    mathStartButton.textContent = "Start Quiz!";
+                }
+            } else {
+                mathStartButton.classList.add('hidden');
+                mathQuizArea.classList.remove('hidden');
+                mathScoreAndProgress.classList.remove('hidden');
+                showMathQuestion();
+            }
+        }
+
+        function showMathQuestion() {
+            stopSpeaking();
+            mathMessageEl.textContent = '';
+            mathNextButton.classList.add('hidden');
+            mathChoicesGrid.innerHTML = '';
+            const currentQuestion = mathQuestions[mathCurrentQuestionIndex];
+            mathContentEl.innerHTML = `<p>${currentQuestion.question}</p>`;
+            speakText(currentQuestion.question);
+            mathProgressDisplay.textContent = `Question ${mathCurrentQuestionIndex + 1} of ${mathQuestions.length}`;
+
+            currentQuestion.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.textContent = choice;
+                button.classList.add('trivia-choice-button');
+                button.addEventListener('click', () => checkMathAnswer(choice, currentQuestion.answer));
+                mathChoicesGrid.appendChild(button);
+            });
+        }
+
+        function checkMathAnswer(selectedChoice, correctAnswer) {
+            stopSpeaking();
+            const choiceButtons = mathChoicesGrid.querySelectorAll('.trivia-choice-button');
+            choiceButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('trivia-correct');
+                } else {
+                    button.classList.add('trivia-incorrect');
+                }
+            });
+
+            if (selectedChoice === correctAnswer) {
+                mathTriviaScore += 10;
+                mathScoreDisplay.textContent = `Knowledge Coins: ${mathTriviaScore}`;
+                const randomPraise = mathPraise[Math.floor(Math.random() * mathPraise.length)];
+                mathMessageEl.textContent = randomPraise;
+                speakText(randomPraise);
+            } else {
+                mathMessageEl.textContent = `Not quite! The correct answer was "${correctAnswer}". Don't worry, you'll get the next one!`;
+                speakText(`Not quite! The correct answer was "${correctAnswer}". Don't worry, you'll get the next one!`);
+            }
+            mathNextButton.classList.remove('hidden');
+        }
+
+        function nextMathQuestion() {
+            mathCurrentQuestionIndex++;
+            if (mathCurrentQuestionIndex < mathQuestions.length) {
+                showMathQuestion();
+            } else {
+                mathContentEl.innerHTML = `<p>You did it! You've finished the quiz. You got ${mathTriviaScore/10} out of ${mathQuestions.length} questions correct! You're a math master! 💯</p>`;
+                speakText(`You did it! You've finished the quiz. You got ${mathTriviaScore/10} out of ${mathQuestions.length} questions correct! You're a math master!`);
+                mathQuizArea.classList.add('hidden');
+                mathScoreAndProgress.classList.add('hidden');
+                mathStartButton.textContent = "Play Again?";
+                mathStartButton.classList.remove('hidden');
+                mathStartButton.onclick = () => showMathTrivia();
+            }
+        }
+
+        mathStartButton.addEventListener('click', showMathNextContent);
+        mathNextButton.addEventListener('click', nextMathQuestion);
+
+        // ============================================================================
+        // G.K. QUIZ LOGIC
+        // ============================================================================
+        const gkPraise = [
+            "That's right! You're a G.K. expert! 🎉",
+            "Yes! Spot on! Amazing knowledge! 🤩",
+            "Absolutely correct! You're a star student! ⭐",
+            "Bingo! That was an easy one for you, wasn't it? 😎",
+            "Terrific! Your brain is full of amazing facts! 💡"
+        ];
+        
+        const gkFacts = [
+            { text: "The largest planet in our solar system is Jupiter." },
+            { text: "The largest mammal on Earth is the blue whale." },
+            { text: "The capital of Japan is Tokyo." },
+            { text: "The Eiffel Tower is located in Paris, France." },
+            { text: "The process by which plants make their food is called photosynthesis." },
+            { text: "The country with the most pyramids is Sudan, not Egypt!" }
+        ];
+
+        const gkQuestions = [
+            {
+                question: "What is the largest planet in our solar system?",
+                choices: ["Mars", "Jupiter", "Earth", "Saturn"],
+                answer: "Jupiter"
+            },
+            {
+                question: "What is the largest mammal on Earth?",
+                choices: ["Elephant", "Giraffe", "Blue Whale", "Polar Bear"],
+                answer: "Blue Whale"
+            },
+            {
+                question: "In which city is the Eiffel Tower located?",
+                choices: ["London", "Rome", "Paris", "New York"],
+                answer: "Paris"
+            },
+            {
+                question: "What process do plants use to make food?",
+                choices: ["Respiration", "Digestion", "Photosynthesis", "Germination"],
+                answer: "Photosynthesis"
+            },
+            {
+                question: "Which country has the most pyramids?",
+                choices: ["Egypt", "Mexico", "China", "Sudan"],
+                answer: "Sudan"
+            }
+        ];
+
+        let gkCurrentFactIndex = 0;
+        let gkCurrentQuestionIndex = 0;
+        let gkIsLearningPhase = true;
+        let gkTriviaScore = 0;
+
+        function showGKTrivia() {
+            document.getElementById('gk-trivia-modal').classList.remove('hidden');
+            document.getElementById('gk-trivia-modal').style.display = 'flex';
+            markDailyGoal('goal-game');
+            const usageData = getUsageData();
+            usageData.gamesPlayed++;
+            saveUsageData(usageData);
+
+            // Reset game state
+            gkCurrentFactIndex = 0;
+            gkCurrentQuestionIndex = 0;
+            gkIsLearningPhase = true;
+            gkTriviaScore = 0;
+            document.getElementById('gk-score-display').textContent = `Knowledge Coins: ${gkTriviaScore}`;
+
+            showGKNextContent();
+        }
+        
+        function closeGKTrivia() {
+            stopSpeaking();
+            updateKnowledgeCoins(gkTriviaScore);
+            gkTriviaScore = 0;
+            document.getElementById('gk-trivia-modal').classList.add('hidden');
+            gkStartButton.textContent = "Let's Go!";
+            gkQuizArea.classList.add('hidden');
+            gkScoreAndProgress.classList.add('hidden');
+        }
+
+        function showGKNextContent() {
+            if (gkIsLearningPhase) {
+                if (gkCurrentFactIndex < gkFacts.length) {
+                    gkContentEl.innerHTML = `<p>${gkFacts[gkCurrentFactIndex].text}</p>`;
+                    speakText(gkFacts[gkCurrentFactIndex].text);
+                    gkCurrentFactIndex++;
+                    gkStartButton.textContent = "Next Fact";
+                } else {
+                    gkIsLearningPhase = false;
+                    gkContentEl.innerHTML = `<p>Time to test your knowledge! Let's see what you remember. 🤔</p>`;
+                    speakText("Time to test your knowledge! Let's see what you remember.");
+                    gkStartButton.textContent = "Start Quiz!";
+                }
+            } else {
+                gkStartButton.classList.add('hidden');
+                gkQuizArea.classList.remove('hidden');
+                gkScoreAndProgress.classList.remove('hidden');
+                showGKQuestion();
+            }
+        }
+        
+        function showGKQuestion() {
+            stopSpeaking();
+            gkMessageEl.textContent = '';
+            gkNextButton.classList.add('hidden');
+            gkChoicesGrid.innerHTML = '';
+            const currentQuestion = gkQuestions[gkCurrentQuestionIndex];
+            gkContentEl.innerHTML = `<p>${currentQuestion.question}</p>`;
+            speakText(currentQuestion.question);
+            gkProgressDisplay.textContent = `Question ${gkCurrentQuestionIndex + 1} of ${gkQuestions.length}`;
+
+            currentQuestion.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.textContent = choice;
+                button.classList.add('trivia-choice-button');
+                button.addEventListener('click', () => checkGKAnswer(choice, currentQuestion.answer));
+                gkChoicesGrid.appendChild(button);
+            });
+        }
+        
+        function checkGKAnswer(selectedChoice, correctAnswer) {
+            stopSpeaking();
+            const choiceButtons = gkChoicesGrid.querySelectorAll('.trivia-choice-button');
+            choiceButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('trivia-correct');
+                } else {
+                    button.classList.add('trivia-incorrect');
+                }
+            });
+
+            if (selectedChoice === correctAnswer) {
+                gkTriviaScore += 10;
+                gkScoreDisplay.textContent = `Knowledge Coins: ${gkTriviaScore}`;
+                const randomPraise = gkPraise[Math.floor(Math.random() * gkPraise.length)];
+                gkMessageEl.textContent = randomPraise;
+                speakText(randomPraise);
+            } else {
+                gkMessageEl.textContent = `Oops! The correct answer was "${correctAnswer}". Keep learning!`;
+                speakText(`Oops! The correct answer was "${correctAnswer}". Keep learning!`);
+            }
+            gkNextButton.classList.remove('hidden');
+        }
+        
+        function nextGKQuestion() {
+            gkCurrentQuestionIndex++;
+            if (gkCurrentQuestionIndex < gkQuestions.length) {
+                showGKQuestion();
+            } else {
+                gkContentEl.innerHTML = `<p>Quiz complete! You got ${gkTriviaScore/10} out of ${gkQuestions.length} questions correct. Well done! 💯</p>`;
+                speakText(`Quiz complete! You got ${gkTriviaScore/10} out of ${gkQuestions.length} questions correct. Well done!`);
+                gkQuizArea.classList.add('hidden');
+                gkScoreAndProgress.classList.add('hidden');
+                gkStartButton.textContent = "Play Again?";
+                gkStartButton.classList.remove('hidden');
+                gkStartButton.onclick = () => showGKTrivia();
+            }
+        }
+
+        gkStartButton.addEventListener('click', showGKNextContent);
+        gkNextButton.addEventListener('click', nextGKQuestion);
+
+        // ============================================================================
+        // AVATAR SYSTEM
+        // ============================================================================
+
+        const avatars = [
+            { id: 'avatar-1', name: 'Student', emoji: '👨‍🎓', cost: 0 },
+            { id: 'avatar-2', name: 'Robot', emoji: '🤖', cost: 50 },
+            { id: 'avatar-3', name: 'Astronaut', emoji: '👩‍🚀', cost: 100 },
+            { id: 'avatar-4', name: 'Wizard', emoji: '🧙‍♂️', cost: 150 },
+            { id: 'avatar-5', name: 'Ninja', emoji: '🥷', cost: 200 }
+        ];
+
+        let purchasedAvatars = JSON.parse(localStorage.getItem('purchasedAvatars')) || ['avatar-1'];
+        let equippedAvatar = localStorage.getItem('equippedAvatar') || 'avatar-1';
+
+        function loadAvatars() {
+            const shopContainer = document.getElementById('avatar-shop-container');
+            const currentAvatarDisplay = document.getElementById('current-avatar-display');
+            const currentAvatarEmoji = document.getElementById('current-avatar-emoji');
+            const currentAvatarName = document.getElementById('current-avatar-name');
+            
+            shopContainer.innerHTML = '';
+
+            // Update current avatar display
+            const equippedItem = avatars.find(a => a.id === equippedAvatar);
+            if (equippedItem) {
+                currentAvatarEmoji.textContent = equippedItem.emoji;
+                currentAvatarName.textContent = equippedItem.name;
+            }
+
+            avatars.forEach(avatar => {
+                const isPurchased = purchasedAvatars.includes(avatar.id);
+                const isEquipped = equippedAvatar === avatar.id;
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('card', 'avatar-item');
+                if (isPurchased) {
+                    itemDiv.classList.add('purchased');
+                }
+                if (isEquipped) {
+                    itemDiv.classList.add('equipped');
+                }
+
+                itemDiv.innerHTML = `
+                    <div class="avatar-image">${avatar.emoji}</div>
+                    <div class="font-bold text-lg">${avatar.name}</div>
+                    ${isPurchased 
+                        ? `<button onclick="equipAvatar('${avatar.id}')" class="btn btn-secondary w-full">${isEquipped ? 'Equipped' : 'Equip'}</button>`
+                        : `<button onclick="buyAvatar('${avatar.id}', ${avatar.cost})" class="btn btn-primary w-full">Buy for <span class="coin">🟡</span> ${avatar.cost}</button>`
+                    }
+                `;
+                shopContainer.appendChild(itemDiv);
+            });
+        }
+
+        function buyAvatar(id, cost) {
+            if (totalKnowledgeCoins >= cost) {
+                if (confirm(`Do you want to buy the ${avatars.find(a => a.id === id).name} avatar for ${cost} Knowledge Coins?`)) {
+                    updateKnowledgeCoins(-cost);
+                    purchasedAvatars.push(id);
+                    localStorage.setItem('purchasedAvatars', JSON.stringify(purchasedAvatars));
+                    equipAvatar(id); // Equip new avatar automatically
+                    loadAvatars();
+                    alert('Purchase successful! Avatar equipped.');
+                }
+            } else {
+                alert(`Not enough Knowledge Coins! You need ${cost - totalKnowledgeCoins} more.`);
+            }
+        }
+
+        function equipAvatar(id) {
+            equippedAvatar = id;
+            localStorage.setItem('equippedAvatar', equippedAvatar);
+            loadAvatars(); // Refresh UI to show the new equipped avatar
+            alert('Avatar equipped successfully!');
+        }
+
+        // Initialize avatar system
+        loadAvatars();
+        
+    </script>
+</body>
+</html>

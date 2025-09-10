@@ -1,0 +1,3980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IgniteX - Unified Learning Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Color Palette (Unified Theme) */
+        :root {
+            --primary-blue: #B22222; /* Crimson/Dark Red */
+            --secondary-green: #FFB347; /* Light Orange/Peach */
+            --background-light: #FFF5E6; /* Very light creamy background */
+            --surface-light: #FFEAD2; /* Light orange surface */
+            --text-dark: #6B4E28; /* Dark brown for text contrast */
+            --glow-accent: #FFB347; /* Light orange glow accent */
+            --success-green: #10B981;
+            --warning-yellow: #F59E0B;
+            --error-red: #EF4444;
+        }
+
+        /* General body styling for a light, cool theme */
+        body {
+            font-family: 'Fredoka One', cursive;
+            background-image: url('images/final-back.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-dark);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Splash screen styles */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: opacity 1s ease-in-out;
+        }
+
+        #splash-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* New animations for the splash screen */
+        #ignitex-animation-container {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            transform: scale(0);
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #ignitex-animation-container.show {
+            animation: zoom-in-circular 1.5s ease-in-out forwards;
+        }
+
+        /* Keyframe animations for the new splash screen effect */
+        @keyframes zoom-in-circular {
+            0% { transform: scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: scale(1.5); opacity: 1; }
+        }
+
+        @keyframes zoom-out-full-page {
+            0% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(10); opacity: 0; }
+        }
+
+        /* Subtle radial gradient for the background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150vw;
+            height: 150vw;
+            background: radial-gradient(circle, rgba(178, 34, 34, 0.05) 0%, rgba(255, 245, 230, 0) 60%);
+            z-index: -1;
+        }
+
+        /* Universal Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* General body styling */
+        body {
+            font-family: 'Fredoka One', cursive;
+            background-image: url('Images/final-back.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-dark);
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Authentication Page Styles */
+        .auth-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--background-light) 0%, var(--surface-light) 100%);
+        }
+
+        .auth-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 450px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 95%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            animation: fadeIn 0.5s ease-in-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--surface-light);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 1rem;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Form Styles */
+        input, select, textarea {
+            padding: 1rem;
+            border: 2px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            font-family: 'Fredoka One', cursive;
+            transition: border-color 0.2s ease;
+            width: 100%;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(178, 34, 34, 0.1);
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-family: 'Fredoka One', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #9B1C1C;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-green);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #FF9500;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: var(--error-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #DC2626;
+            transform: translateY(-1px);
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-size: 2rem;
+            color: var(--primary-blue);
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Navigation Styles */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--surface-light);
+            border: none;
+            border-radius: 0.5rem;
+            font-family: 'Fredoka One', cursive;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .nav-tab:hover {
+            background-color: var(--secondary-green);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-primary { color: var(--primary-blue); }
+        .text-secondary { color: var(--secondary-green); }
+        .text-success { color: var(--success-green); }
+        .text-warning { color: var(--warning-yellow); }
+        .text-error { color: var(--error-red); }
+        .w-full { width: 100%; }
+        
+        /* Table Styles */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th, .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .table th {
+            background-color: var(--surface-light);
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                width: 98%;
+                padding: 1rem;
+                margin: 1rem auto;
+            }
+            
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-actions {
+                justify-content: center;
+            }
+            
+            .nav-tabs {
+                justify-content: center;
+            }
+        }
+
+        /* Splash screen styles */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: opacity 1s ease-in-out;
+        }
+
+        #splash-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #ignitex-animation-container {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            transform: scale(0);
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #ignitex-animation-container.show {
+            animation: zoom-in-circular 1.5s ease-in-out forwards;
+        }
+
+        @keyframes zoom-in-circular {
+            0% { transform: scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: scale(1.5); opacity: 1; }
+        }
+
+        /* Text styling */
+        .neon-text {
+            color: var(--primary-blue);
+        }
+        /* Text styling */
+        .neon-text {
+            color: var(--primary-blue);
+        }
+
+        .streak-text {
+            color: var(--primary-blue);
+        }
+
+        .streak-text .glow-accent {
+            color: var(--secondary-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div id="ignitex-animation-container">
+            <img src="Images/main-app-logo.png" alt="IgniteX Logo" class="w-32 h-32">
+        </div>
+        <h1 class="text-4xl text-primary mt-4">IgniteX</h1>
+        <p class="text-lg mt-2">Loading your learning experience...</p>
+    </div>
+
+    <!-- Authentication Page -->
+    <div id="auth-page" class="auth-page hidden">
+        <div class="auth-container">
+            <div class="text-center mb-6">
+                <img src="Images/main-app-logo.png" alt="IgniteX Logo" class="w-20 h-20 mx-auto mb-4">
+                <h1 class="text-3xl text-primary font-bold">IgniteX</h1>
+                <p class="text-lg mt-2">Your Educational Companion</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form-container">
+                <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
+                <form id="login-form" class="flex flex-col gap-4">
+                    <input type="text" id="login-username" placeholder="Username" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <div class="text-right">
+                        <a href="#" id="forgot-link" class="text-sm text-primary">Forgot Password?</a>
+                    </div>
+                    <p id="login-error" class="text-error text-sm text-center hidden"></p>
+                    <button type="submit" class="btn btn-primary w-full">Login</button>
+                </form>
+                <p class="text-center mt-4 text-sm">
+                    Don't have an account? 
+                    <span id="show-register" class="text-primary cursor-pointer font-bold">Register here</span>
+                </p>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="register-form-container" class="hidden">
+                <h2 class="text-2xl font-bold text-center mb-6">Register</h2>
+                <form id="register-form" class="flex flex-col gap-4">
+                    <input type="text" id="register-name" placeholder="Full Name" required>
+                    <input type="text" id="register-username" placeholder="Username" required>
+                    <input type="password" id="register-password" placeholder="Password" required>
+                    <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
+                    <select id="register-role" required>
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="parent">Parent</option>
+                    </select>
+                    
+                    <!-- Student Additional Fields -->
+                    <div id="student-fields" class="hidden flex flex-col gap-4">
+                        <input type="text" id="student-class" placeholder="Class/Grade">
+                        <input type="text" id="student-fav-subject" placeholder="Favorite Subject">
+                        <textarea id="student-aim" placeholder="Your aim in life..." rows="3"></textarea>
+                    </div>
+                    
+                    <p id="register-error" class="text-error text-sm text-center hidden"></p>
+                    <button type="submit" class="btn btn-primary w-full">Register</button>
+                </form>
+                <p class="text-center mt-4 text-sm">
+                    Already have an account? 
+                    <span id="show-login" class="text-primary cursor-pointer font-bold">Login here</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="main-dashboard" class="hidden">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1 class="header-title">IgniteX Dashboard</h1>
+                <p id="user-welcome" class="text-lg"></p>
+            </div>
+            <div class="header-actions">
+                <button id="profile-btn" class="btn btn-secondary">Profile</button>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <!-- Role-based Navigation -->
+            <div id="navigation-tabs" class="nav-tabs">
+                <!-- Tabs will be populated based on user role -->
+            </div>
+
+            <!-- Student Dashboard -->
+            <div id="student-dashboard" class="role-dashboard hidden">
+                <div id="student-overview" class="tab-content">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Student Overview</h2>
+                    <div class="flex flex-col gap-4">
+                        <div class="card">
+                            <h3 class="text-xl font-bold text-secondary mb-2">Quick Stats</h3>
+                            <div class="flex gap-4">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-primary" id="student-assignments-count">0</p>
+                                    <p class="text-sm">Assignments</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-primary" id="student-notes-count">0</p>
+                                    <p class="text-sm">Notes</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-primary" id="student-marks-count">0</p>
+                                    <p class="text-sm">Test Scores</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="student-assignments" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">My Assignments</h2>
+                    <div id="student-assignments-list">
+                        <!-- Assignments will be populated here -->
+                    </div>
+                </div>
+
+                <div id="student-notes" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Notes & Resources</h2>
+                    <div id="student-notes-list">
+                        <!-- Notes will be populated here -->
+                    </div>
+                </div>
+
+                <div id="student-marks" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">My Test Marks</h2>
+                    <div id="student-marks-list">
+                        <!-- Marks will be populated here -->
+                    </div>
+                </div>
+
+                <div id="student-games" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Learning Games</h2>
+                    <div class="flex flex-col gap-4">
+                        <div class="card">
+                            <h3 class="text-xl font-bold text-secondary mb-2">Memory Match Game</h3>
+                            <p class="mb-4">Test your memory skills with our educational memory matching game!</p>
+                            <button onclick="openMemoryGame()" class="btn btn-primary">Play Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teacher Dashboard -->
+            <div id="teacher-dashboard" class="role-dashboard hidden">
+                <div id="teacher-overview" class="tab-content">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Teacher Overview</h2>
+                    <div class="flex flex-col gap-4">
+                        <div class="card">
+                            <h3 class="text-xl font-bold text-secondary mb-2">Quick Actions</h3>
+                            <div class="flex gap-2 flex-wrap">
+                                <button onclick="showTab('teacher-assignments')" class="btn btn-secondary">Create Assignment</button>
+                                <button onclick="showTab('teacher-notes')" class="btn btn-secondary">Post Notes</button>
+                                <button onclick="showTab('teacher-marks')" class="btn btn-secondary">Grade Students</button>
+                                <button onclick="showTab('teacher-students')" class="btn btn-secondary">View Students</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="teacher-students" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">My Students</h2>
+                    <div id="teacher-students-list">
+                        <!-- Students will be populated here -->
+                    </div>
+                </div>
+
+                <div id="teacher-assignments" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Create Assignment</h2>
+                    <div class="card">
+                        <form id="teacher-assignment-form" class="flex flex-col gap-4">
+                            <input type="text" id="assignment-title" placeholder="Assignment Title" required>
+                            <input type="text" id="assignment-subject" placeholder="Subject" required>
+                            <input type="date" id="assignment-due-date" required>
+                            <textarea id="assignment-description" placeholder="Assignment Description" rows="4"></textarea>
+                            <button type="submit" class="btn btn-primary">Create Assignment</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="teacher-notes" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Post Notes</h2>
+                    <div class="card">
+                        <form id="teacher-notes-form" class="flex flex-col gap-4">
+                            <input type="text" id="note-title" placeholder="Note Title" required>
+                            <textarea id="note-content" placeholder="Note Content" rows="6" required></textarea>
+                            <button type="submit" class="btn btn-primary">Post Notes</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="teacher-marks" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Grade Students</h2>
+                    <div class="card">
+                        <form id="teacher-marks-form" class="flex flex-col gap-4">
+                            <select id="marks-student" required>
+                                <option value="" disabled selected>Select Student</option>
+                            </select>
+                            <input type="text" id="marks-subject" placeholder="Subject" required>
+                            <input type="number" id="marks-score" placeholder="Score" min="0" max="100" required>
+                            <button type="submit" class="btn btn-primary">Submit Marks</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="teacher-comments" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Parent Comments</h2>
+                    <div id="teacher-comments-list">
+                        <!-- Comments will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parent Dashboard -->
+            <div id="parent-dashboard" class="role-dashboard hidden">
+                <div id="parent-overview" class="tab-content">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Parent Overview</h2>
+                    
+                    <!-- Child Linking Section -->
+                    <div id="link-child-section" class="card hidden">
+                        <h3 class="text-xl font-bold text-secondary mb-4">Link Your Child</h3>
+                        <form id="link-child-form" class="flex flex-col gap-4">
+                            <input type="text" id="child-username" placeholder="Child's Username" required>
+                            <button type="submit" class="btn btn-primary">Link Child</button>
+                        </form>
+                        <p id="link-status" class="text-sm mt-2"></p>
+                    </div>
+
+                    <!-- Child Performance Section -->
+                    <div id="child-performance-section" class="hidden">
+                        <div class="card">
+                            <h3 class="text-xl font-bold text-secondary mb-2">Child Information</h3>
+                            <p id="child-name" class="text-lg"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="parent-assignments" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Child's Assignments</h2>
+                    <div id="parent-assignments-list">
+                        <!-- Assignments will be populated here -->
+                    </div>
+                </div>
+
+                <div id="parent-marks" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Child's Marks</h2>
+                    <div id="parent-marks-list">
+                        <!-- Marks will be populated here -->
+                    </div>
+                </div>
+
+                <div id="parent-communication" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Communicate with Teacher</h2>
+                    <div class="card">
+                        <form id="parent-comment-form" class="flex flex-col gap-4">
+                            <textarea id="parent-comment" placeholder="Write a message to the teacher..." rows="4" required></textarea>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-primary mb-4">Profile Settings</h3>
+            <div class="flex flex-col gap-4">
+                <button id="change-password-btn" class="btn btn-secondary w-full">Change Password</button>
+                <button id="change-username-btn" class="btn btn-secondary w-full">Change Username</button>
+                <button id="delete-account-btn" class="btn btn-danger w-full">Delete Account</button>
+                <button id="close-profile-modal" class="btn btn-primary w-full">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="password-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-primary mb-4">Change Password</h3>
+            <form id="change-password-form" class="flex flex-col gap-4">
+                <input type="password" id="old-password" placeholder="Current Password" required>
+                <input type="password" id="new-password" placeholder="New Password" required>
+                <input type="password" id="confirm-new-password" placeholder="Confirm New Password" required>
+                <p id="password-message" class="text-sm text-center hidden"></p>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary w-full">Save</button>
+                    <button type="button" id="cancel-password-change" class="btn btn-secondary w-full">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Username Modal -->
+    <div id="username-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-primary mb-4">Change Username</h3>
+            <form id="change-username-form" class="flex flex-col gap-4">
+                <input type="text" id="new-username" placeholder="New Username" required>
+                <input type="password" id="confirm-password-username" placeholder="Confirm Password" required>
+                <p id="username-message" class="text-sm text-center hidden"></p>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary w-full">Save</button>
+                    <button type="button" id="cancel-username-change" class="btn btn-secondary w-full">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+        }
+
+        #quotes-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        .quote-container {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .quote-card {
+            background-color: var(--surface-light);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #quote-text {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        #quote-author {
+            font-size: 1rem;
+            text-align: center;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        #quotes-list-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .previous-quote {
+            background-color: #E6F3F9;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        /* Styles for the calendar page */
+        #calendar-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+        }
+        
+        #calendar-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            background-color: var(--surface-light);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .calendar-day.current-day {
+            background-color: var(--primary-blue);
+            color: white;
+            box-shadow: 0 0 10px rgba(178, 34, 34, 0.5);
+        }
+
+        .calendar-day:hover {
+            background-color: #E6F3F9;
+        }
+
+        .day-header {
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .calendar-event {
+            font-size: 0.75rem;
+            color: var(--primary-blue);
+            margin-top: 4px;
+            text-shadow: 0 0 2px var(--primary-blue);
+        }
+        
+        /* Event Modal Styles */
+        .event-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        .event-modal {
+            background-color: var(--background-light);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4-5px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: modal-fade-in 0.3s forwards;
+        }
+        
+        @keyframes modal-fade-in {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Styles for the stories page */
+        #stories-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+            flex-direction: column;
+        }
+
+        #stories-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        .stories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .story-card {
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .story-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .story-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        /* Styles for the assignments page */
+        #assignments-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(-100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+        }
+
+        #assignments-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        .assignments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .assignment-item {
+            background-color: var(--surface-light);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .assignment-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .assignment-subject {
+            font-size: 1rem;
+            color: var(--text-dark);
+        }
+
+        .assignment-duedate {
+            font-size: 0.875rem;
+            color: var(--secondary-green);
+            margin-top: 0.25rem;
+        }
+
+        /* Styles for the profile page */
+        #profile-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(-100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+        }
+
+        #profile-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        .profile-details-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background-color: var(--surface-light);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ignitex-logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .ignitex-logo-container img {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+        }
+        
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .color-swatch.selected-color {
+            border-color: var(--primary-blue);
+            transform: scale(1.1);
+            box-shadow: 0 0 8px rgba(178, 34, 34, 0.5);
+        }
+
+        /* Styles for the user details form page */
+        #user-details-form-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #user-details-form-page.active {
+            display: flex;
+        }
+
+        /* Quiz page styles */
+        #quiz-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #quiz-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        #quiz-page .container {
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: var(--surface-light);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+        }
+
+        #quiz-page .question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        #quiz-page .options {
+            margin-bottom: 20px;
+        }
+        
+        #quiz-page .option {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #quiz-page .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary-blue);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        #quiz-page .button:hover {
+            background-color: var(--secondary-green);
+            color:#F0F9FF
+        }
+
+        #quiz-page .result {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        #quiz-page .hide {
+            display: none;
+        }
+
+        /* New section specific styles */
+        #new-section-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #new-section-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        .game-card {
+            width: 100%;
+            min-height: 100px;
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            border: 2px dashed var(--primary-blue);
+            color:#fff
+
+        }
+
+        .game-button {
+            padding: 10px 20px;
+            background-color: var(--primary-blue);
+            color: white;
+            border-radius: 9999px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        }
+        
+        .game-button:hover {
+            background-color: var(--secondary-green);
+            transform: translateY(-2px);
+            color:#F0F9FF
+        }
+
+        .main-button-div {
+            width: 90%;
+            min-height: 150px;
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            color:#fff
+
+        }
+
+        .main-button-div:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.4);
+            color:#fff
+        }
+
+        .main-button-div:active {
+            transform: scale(0.98);
+        }
+
+        /* New styles for the footer buttons to match the app's UI */
+        .footer-button {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        /* Make all footer buttons circular */
+        .footer-button, .footer-button.main {
+            border-radius: 9999px;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .footer-button.main {
+            width: 96px;
+            height: 96px;
+            background-color: var(--primary-blue);
+        }
+
+        .footer-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .footer-button.main:hover {
+            background-color: var(--primary-blue);
+        }
+        
+        .footer-button img {
+            border-radius: 9999px;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        
+
+        /* Styles for the new side panels */
+        .side-panel {
+            min-width: 250px;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            background-color: var(--surface-light);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background-color: rgba(255, 255, 255, 0.4);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .stat-card-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-top: 0.25rem;
+        }
+
+        .upcoming-item {
+            background-color: rgba(255, 255, 255, 0.4);
+            padding: 0.75rem;
+            border-left: 4px solid var(--secondary-green);
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 1024px) {
+            .side-panel-container {
+                display: none;
+            }
+        }
+
+        /* Word puzzle game styles */
+        #word-puzzle-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+        }
+        
+        #word-puzzle-page.active {
+            transform: translateX(0);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #word-puzzle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        #word-scramble {
+            font-size: 3rem;
+            letter-spacing: 5px;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 2rem;
+        }
+
+        #guess-input {
+            padding: 1rem;
+            border-radius: 9999px;
+            border: 2px solid var(--primary-blue);
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            background-color: transparent;
+            width: 80%;
+            max-width: 300px;
+            transition: border-color 0.3s;
+        }
+
+        #guess-input:focus {
+            outline: none;
+            border-color: var(--secondary-green);
+        }
+
+        #check-btn {
+            background-color: var(--secondary-green);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        #check-btn:hover {
+            background-color: #23a044;
+        }
+        
+        #game-result {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        #next-word-btn {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        #next-word-btn:hover {
+            background-color: #0069cc;
+        }
+
+        /* Speed Math Race game styles */
+        #speed-math-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+        }
+
+        #speed-math-page.active {
+            transform: translateX(0);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #speed-math-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        #math-problem {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        #timer {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            color: var(--secondary-green);
+            font-weight: bold;
+        }
+        
+        #time-input {
+            padding: 1rem;
+            border-radius: 9999px;
+            border: 2px solid var(--primary-blue);
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            background-color: transparent;
+            width: 80%;
+            max-width: 300px;
+            margin-top: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        #time-input:focus {
+            outline: none;
+            border-color: var(--secondary-green);
+        }
+
+        #math-answer {
+            padding: 1rem;
+            border-radius: 9999px;
+            border: 2px solid var(--primary-blue);
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            background-color: transparent;
+            width: 80%;
+            max-width: 300px;
+            margin-top: 2rem;
+            transition: border-color 0.3s;
+        }
+
+        #math-answer:focus {
+            outline: none;
+            border-color: var(--secondary-green);
+        }
+
+        #math-result {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #start-math-btn {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+        #start-math-btn:disabled {
+            background-color: #A9A9A9;
+            cursor: not-allowed;
+        }
+        #start-math-btn:hover:enabled {
+            background-color: #0069cc;
+        }
+        
+        /* New styles for streak page */
+        #streak-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+            flex-direction: column;
+        }
+
+        #streak-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        /* Styles for the new games page */
+        #games-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out;
+            display: none;
+            flex-direction: column;
+        }
+
+        #games-page.active {
+            transform: translateX(0);
+            display: flex;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .game-card a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .game-card a:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between h-screen p-4">
+    <div id="splash-screen" class="absolute w-full h-full flex flex-col items-center justify-center bg-[var(--background-light)]">
+        <div id="ignitex-animation-container" class="flex flex-col items-center justify-center">
+            <img src="Images/main-app-logo.png" alt="IgniteX Logo" class="w-48 h-auto">
+        </div>
+    </div>
+    <div id="main-ui" class="w-full h-full flex flex-col items-center justify-between" style="display:none;">
+        <header class="w-full flex justify-between items-center px-2 py-4">
+            <div class="flex items-center space-x-2">
+                <div id="profile-icon" class="relative w-10 h-10 rounded-full bg-slate-500 header-button cursor-pointer" onclick="showProfilePage()">
+                    <span id="profile-initial" class="absolute inset-0 flex items-center justify-center text-lg font-bold text-white">P</span>
+                    <span class="absolute top-0 right-0 transform translate-x-1 -translate-y-1 w-3 h-3 bg-[var(--secondary-green)] rounded-full ring-2 ring-[var(--background-light)]"></span>
+                </div>
+                <div class="relative w-8 h-8 flex items-center justify-center header-button cursor-pointer" id="notification-button" onclick="showAssignmentsPage()">
+                    <svg class="w-6 h-6 text-[var(--primary-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 text-sm font-medium">
+                <div class="flex items-center space-x-2 px-2 py-1 rounded-full bg-[var(--surface-light)] cursor-pointer header-button" onclick="showQuotesPage()">
+                    <svg class="w-5 h-5 text-[var(--primary-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    <span class="text-xs text-[var(--primary-blue)]">Daily Quotes</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="relative w-8 h-8 flex items-center justify-center header-button cursor-pointer" onclick="showStoriesPage()">
+                        <svg class="w-6 h-6 text-[var(--primary-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2v6h6m-4 5H8m8 4H8m8-8H8"></path>
+                        </svg>
+                    </div>
+                    <div class="relative w-8 h-8 flex items-center justify-center header-button cursor-pointer" onclick="showCalendarPage()">
+                        <svg class="w-6 h-6 text-[var(--primary-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 px-2 py-1 rounded-full bg-[var(--surface-light)] cursor-pointer header-button" onclick="showStreakPage()">
+                <span id="streak-display-header" class="text-xs text-[var(--primary-blue)]">24 days streak ⚡️</span>
+            </div>
+        </header>
+
+        <main id="main-content" class="flex items-start justify-center flex-grow w-full space-x-4">
+            <div class="side-panel-container w-1/4 max-w-sm hidden lg:flex flex-col space-y-4">
+                <div class="side-panel">
+                    <h2 class="text-xl font-bold text-[var(--primary-blue)]">Quick Stats</h2>
+                    <div class="stat-card">
+                        <p class="stat-card-title">Total Quizzes</p>
+                        <p class="stat-card-value">12</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-card-title">Assignments Done</p>
+                        <p class="stat-card-value">5</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-card-title">Current Streak</p>
+                        <p class="stat-card-value">24 🔥</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center space-y-8 w-full max-w-2xl">
+                <div id="main-btn-1" class="main-button-div cursor-pointer" onclick="showWordPuzzleGame()">
+                    <div class="text-xl font-bold text-center text-[var(--primary-blue)]">
+                        Word Puzzle Game
+                    </div>
+                    <div class="text-md text-center text-[var(--text-dark)] mt-2">
+                        Play to improve your vocabulary!
+                    </div>
+                </div>
+                <div id="main-btn-2" class="main-button-div cursor-pointer" onclick="showSpeedMathGame()">
+                    <div class="text-xl font-bold text-center text-[var(--primary-blue)]">
+                        Speed Math Race
+                    </div>
+                    <div class="text-md text-center text-[var(--text-dark)] mt-2">
+                        Sharpen your math skills!
+                    </div>
+                </div>
+                <div id="main-btn-3" class="main-button-div cursor-pointer" onclick="handleMainButtonClick('main-btn-3')">
+                    <div class="text-xl font-bold text-center text-[var(--primary-blue)]">
+                        Explore New Content
+                    </div>
+                    <div class="text-md text-center text-[var(--text-dark)] mt-2">
+                        Discover new stories & quizzes.
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-panel-container w-1/4 max-w-sm hidden lg:flex flex-col space-y-4">
+                <div class="side-panel">
+                    <h2 class="text-xl font-bold text-[var(--primary-blue)]">Upcoming Tasks</h2>
+                    <div class="upcoming-item">
+                        <p class="text-sm font-bold text-[var(--text-dark)]">Math Homework</p>
+                        <p class="text-xs text-[var(--secondary-green)]">Due: Oct 10</p>
+                    </div>
+                    <div class="upcoming-item">
+                        <p class="text-sm font-bold text-[var(--text-dark)]">Science Project</p>
+                        <p class="text-xs text-[var(--secondary-green)]">Due: Oct 15</p>
+                    </div>
+                    <div class="upcoming-item">
+                        <p class="text-sm font-bold text-[var(--text-dark)]">History Essay</p>
+                        <p class="text-xs text-[var(--secondary-green)]">Due: Oct 20</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="w-full flex justify-center p-4">
+            <div class="flex space-x-4">
+                <div class="flex flex-col items-center">
+                    <div class="w-20 h-20 flex items-center justify-center footer-button">
+                        <img class="w-full h-full object-cover" src="Images/video.png" alt="Video button" />
+                    </div>
+                    <p class="mt-1 text-sm text-gray-700">Video</p>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div class="w-20 h-20 flex items-center justify-center footer-button">
+                        <img class="w-full h-full object-cover" src="Images/business.png" alt="Business button" />
+                    </div>
+                    <p class="mt-1 text-sm text-gray-700">Puzzles</p>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div class="w-24 h-24 flex items-center justify-center footer-button main" onclick="showGamesPage()">
+                        <img class="w-full h-full object-cover" src="Images/joystick_14988126.png" alt="Joystick button" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div class="w-20 h-20 flex items-center justify-center footer-button">
+                        <img class="w-full h-full object-cover" src="Images/read.png" alt="Read button" />
+                    </div>
+                    <p class="mt-1 text-sm text-gray-700">Read</p>
+                </div>
+
+                <a href="math.html">
+                <div class="flex flex-col items-center">
+                    <div class="w-20 h-20 flex items-center justify-center footer-button">
+                        <img class="w-full h-full object-cover" src="Images/math.png" alt="Math button" />
+                    </div>
+                    <p class="mt-1 text-sm text-gray-700">Math</p>
+                </div>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <div id="games-page" class="absolute w-full h-full flex flex-col items-center justify-between p-4" style="display:none;">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+        <main class="flex flex-col items-center flex-grow w-full max-w-2xl px-4 overflow-y-auto">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">Game Center</h1>
+            <div class="games-grid w-full">
+                <div class="game-card">
+                    <a href="puzzle.html" class="flex flex-col items-center justify-center w-full h-full text-[var(--text-dark)]">
+                        <img src="Images/mental-health (2).png" alt="Puzzle Game" class="w-20 h-20 mb-2">
+                        <h3 class="text-xl font-bold text-[var(--primary-blue)]">Word Puzzle</h3>
+                        <p class="text-sm mt-1">Unscramble words and improve your vocabulary!</p>
+                    </a>
+                </div>
+                <div class="game-card">
+                    <a href="math-game.html" class="flex flex-col items-center justify-center w-full h-full text-[var(--text-dark)]">
+                        <img src="Images/brain-math.png" alt="Math Game" class="w-20 h-20 mb-2">
+                        <h3 class="text-xl font-bold text-[var(--primary-blue)]">Math Race</h3>
+                        <p class="text-sm mt-1">Solve math problems against the clock!</p>
+                    </a>
+                </div>
+                <div class="game-card">
+                    <a href="Memorymatch.html" class="flex flex-col items-center justify-center w-full h-full text-[var(--text-dark)]">
+                        <img src="Images/brain.png" alt="Memory Game" class="w-20 h-20 mb-2">
+                        <h3 class="text-xl font-bold text-[var(--primary-blue)]">Memory Match</h3>
+                        <p class="text-sm mt-1">Test your memory with this matching game!</p>
+                    </a>
+                </div>
+                <div class="game-card">
+                    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-[var(--text-dark)]">
+                        <img src="Images/trivia.png" alt="Trivia Game" class="w-20 h-20 mb-2">
+                        <h3 class="text-xl font-bold text-[var(--primary-blue)]">Trivia Quest</h3>
+                        <p class="text-sm mt-1">Challenge your knowledge with fun facts.</p>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="word-puzzle-page" class="absolute w-full h-full flex flex-col items-center justify-between p-4" style="display:none;">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+        <main class="flex flex-col items-center justify-center flex-grow w-full max-w-lg p-4">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">Word Puzzle</h1>
+            <div id="word-puzzle-container" class="bg-[var(--surface-light)] p-8 rounded-xl shadow-lg w-full max-w-sm">
+                <p id="word-scramble">Loading...</p>
+                <input type="text" id="guess-input" placeholder="Your guess..." class="w-full mt-4">
+                <button id="check-btn" class="mt-4 px-6 py-2">Check Answer</button>
+                <p id="game-result" class="mt-4"></p>
+                <button id="next-word-btn" class="mt-4 px-6 py-2 bg-[var(--primary-blue)] text-white rounded-full">Next Word</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="speed-math-page" class="absolute w-full h-full flex flex-col items-center justify-between p-4" style="display:none;">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+        <main class="flex flex-col items-center justify-center flex-grow w-full max-w-lg p-4 style="color:#FFDAB9;">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">Speed Math Race</h1>
+            <div id="speed-math-container">
+                <p class="text-lg text-[var(--text-dark)] mb-2">Set your time limit (1-300s):</p>
+                <input type="number" id="time-input" placeholder="e.g. 60" class="w-full text-center">
+                <button id="start-math-btn" class="mt-4 px-6 py-2 bg-[var(--primary-blue)] text-white rounded-full" onclick="startSpeedMathGame()">Start Race</button>
+                
+                <div id="game-running-ui" class="mt-8 flex flex-col items-center" style="display: none;">
+                    <div class="flex justify-between w-full mt-4">
+                        <p id="timer" class="text-2xl font-bold text-[var(--secondary-green)]">Time: 0s</p>
+                        <p id="score-display" class="text-2xl font-bold text-[var(--primary-blue)]">Score: 0</p>
+                    </div>
+                    <p id="math-problem" class="text-6xl font-bold text-[var(--primary-blue)] mt-4">0 + 0</p>
+                    <input type="number" id="math-answer" placeholder="Your answer" class="w-full mt-4 text-center">
+                    <p id="math-result" class="mt-4 text-lg font-bold"></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <div id="user-details-form-page" class="w-full h-full flex flex-col items-center justify-center p-4">
+        <h1 class="text-4xl text-[var(--primary-blue)] mb-8">User Details</h1>
+        <form id="user-details-form" class="w-full max-w-lg flex flex-col space-y-4">
+            <input type="text" id="name-input" placeholder="Name" class="p-4 rounded-md border-2 border-gray-300">
+            <input type="text" id="class-input" placeholder="Class" class="p-4 rounded-md border-2 border-gray-300">
+            <input type="text" id="roll-no-input" placeholder="Roll No." class="p-4 rounded-md border-2 border-gray-300">
+            <input type="text" id="school-input" placeholder="School" class="p-4 rounded-md border-2 border-gray-300">
+            <input type="text" id="verification-id-input" placeholder="Verification ID" class="p-4 rounded-md border-2 border-gray-300">
+            <input type="text" id="father-name-input" placeholder="Father's Name" class="p-4 rounded-md border-2 border-gray-300">
+            <input type="text" id="fav-subject-input" placeholder="Favorite Subject" class="p-4 rounded-md border-2 border-gray-300">
+            <div class="flex flex-col space-y-2">
+                <label class="text-lg font-bold">Favorite Color</label>
+                <div id="color-palette-form" class="flex justify-around items-center space-x-2 p-2 rounded-md bg-[var(--surface-light)]">
+                    </div>
+                <input type="hidden" id="fav-color-input">
+            </div>
+            <button type="submit" class="px-8 py-4 bg-[var(--primary-blue)] text-white rounded-full shadow-lg hover:scale-105 transition-transform">Save Details</button>
+        </form>
+    </div>
+
+    <div id="profile-page" class="w-full h-full flex flex-col items-center justify-between p-4">
+        <header class="w-full flex justify-between items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+            <button onclick="editProfileDetails()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--primary-blue)] text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                </svg>
+                <span>Edit</span>
+            </button>
+        </header>
+
+        <main class="flex flex-col items-center flex-grow w-full max-w-lg p-4 overflow-y-auto">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">My Profile</h1>
+            <div id="profile-details" class="w-full profile-details-container">
+                <div class="profile-detail-item">
+                    <span class="font-bold">Name:</span>
+                    <span id="profile-name"></span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">Class:</span>
+                    <span id="profile-class"></span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">Roll No.:</span>
+                    <span id="profile-roll-no"></span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">School:</span>
+                    <span id="profile-school"></span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">Verification ID:</span>
+                    <span id="profile-verification-id"></span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">Father's Name:</span>
+                    <span id="profile-father-name"></span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">Favorite Subject:</span>
+                    <span id="profile-fav-subject"></span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">Favorite Color:</span>
+                    <span id="profile-fav-color"></span>
+                </div>
+            </div>
+            
+            <form id="profile-edit-form" class="w-full max-w-lg flex flex-col space-y-4 mt-8 hidden">
+                <input type="text" id="edit-name-input" placeholder="Name" class="p-4 rounded-md border-2 border-gray-300">
+                <input type="text" id="edit-class-input" placeholder="Class" class="p-4 rounded-md border-2 border-gray-300">
+                <input type="text" id="edit-roll-no-input" placeholder="Roll No." class="p-4 rounded-md border-2 border-gray-300">
+                <input type="text" id="edit-school-input" placeholder="School" class="p-4 rounded-md border-2 border-gray-300">
+                <input type="text" id="edit-verification-id-input" placeholder="Verification ID" class="p-4 rounded-md border-2 border-gray-300">
+                <input type="text" id="edit-father-name-input" placeholder="Father's Name" class="p-4 rounded-md border-2 border-gray-300">
+                <input type="text" id="edit-fav-subject-input" placeholder="Favorite Subject" class="p-4 rounded-md border-2 border-gray-300">
+                <div class="flex flex-col space-y-2">
+                    <label class="text-lg font-bold">Favorite Color</label>
+                    <div id="color-palette-edit" class="flex justify-around items-center space-x-2 p-2 rounded-md bg-[var(--surface-light)]">
+                         </div>
+                    <input type="hidden" id="edit-fav-color-input">
+                </div>
+                <button type="submit" class="px-8 py-4 bg-[var(--primary-blue)] text-white rounded-full shadow-lg hover:scale-105 transition-transform">Save Changes</button>
+                <button type="button" onclick="cancelEdit()" class="px-8 py-4 bg-[var(--surface-light)] text-[var(--text-dark)] rounded-full shadow-lg hover:scale-105 transition-transform">Cancel</button>
+            </form>
+            
+            <div class="ignitex-logo-container">
+                <p class="text-2xl font-bold text-black">IgniteX.</p>
+                <img src="Images/IgniteX..png" alt="IgniteX Logo" class="mt-2 rounded-lg" style="width: 60px; height: 60px;">
+            </div>
+        </main>
+    </div>
+
+    <div id="quotes-page" class="w-full h-full flex flex-col items-center justify-between p-4">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+
+        <main class="flex flex-col items-center justify-center flex-grow w-full max-w-lg p-4">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">Daily Quotes</h1>
+            <div id="quote-container" class="w-full quote-container">
+                <div class="quote-card">
+                    <p id="quote-text">Click the button below to get a quote!</p>
+                    <p id="quote-author"></p>
+                </div>
+            </div>
+            
+            <button id="get-quote-btn" class="mt-8 px-8 py-4 bg-[var(--primary-blue)] text-white rounded-full shadow-lg hover:scale-105 transition-transform">Get a new quote</button>
+
+            <section class="w-full mt-8">
+                <h2 class="text-2xl text-[var(--text-dark)] mb-4 text-center">Previous Quotes</h2>
+                <div id="quotes-list-container" class="flex flex-col space-y-4">
+                    </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="calendar-page" class="w-full h-full flex flex-col items-center justify-between p-4">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+
+        <main class="flex flex-col items-center justify-center flex-grow w-full max-w-lg p-4">
+            <div class="w-full flex justify-between items-center mb-4">
+                <button class="px-4 py-2 bg-[var(--primary-blue)] text-white rounded-full" onclick="prevMonth()">&lt;</button>
+                <h2 id="current-month-year" class="text-2xl text-[var(--text-dark)]"></h2>
+                <button class="px-4 py-2 bg-[var(--primary-blue)] text-white rounded-full" onclick="nextMonth()">&gt;</button>
+            </div>
+            <div id="calendar-grid" class="calendar-grid w-full">
+                <span class="day-header">S</span>
+                <span class="day-header">M</span>
+                <span class="day-header">T</span>
+                <span class="day-header">W</span>
+                <span class="day-header">T</span>
+                <span class="day-header">F</span>
+                <span class="day-header">S</span>
+            </div>
+            <section class="w-full mt-8">
+                <h2 class="text-2xl text-[var(--text-dark)] mb-4 text-center">Events</h2>
+                <div id="events-list" class="w-full text-center text-gray-500">No events for today.</div>
+            </section>
+        </main>
+    </div>
+    
+    <div id="event-modal-overlay" class="event-modal-overlay hidden">
+        <div class="event-modal">
+            <h3 id="modal-date" class="text-xl font-bold mb-4"></h3>
+            <div id="modal-events" class="mb-4"></div>
+            <h4 class="text-lg font-bold mb-2">Add New Event</h4>
+            <div class="flex flex-col space-y-4">
+                <input type="text" id="new-event-title" placeholder="Event Title" class="p-2 border rounded-md">
+                <input type="time" id="new-event-time" class="p-2 border rounded-md">
+                <button onclick="addEvent()" class="px-4 py-2 bg-[var(--primary-blue)] text-white rounded-full">Add Event</button>
+            </div>
+            <button onclick="hideEventModal()" class="mt-4 text-sm text-[var(--text-dark)]">Close</button>
+        </div>
+    </div>
+
+    <div id="stories-page" class="w-full h-full flex flex-col items-center justify-between p-4">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+        <main class="flex flex-col items-center flex-grow w-full max-w-2xl px-4 overflow-y-auto">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">Stories</h1>
+            <div class="stories-grid w-full">
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/0A84FF/FFFFFF?text=Story+1" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">The Power of Perseverance</h3>
+                        <p class="text-sm mt-1">A short tale about not giving up, even when things get tough.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/30D158/FFFFFF?text=Story+2" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">The Magic of Collaboration</h3>
+                        <p class="text-sm mt-1">Learn how working together can lead to amazing results.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/00C0FF/FFFFFF?text=Story+3" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">Unlocking Your Potential</h3>
+                        <p class="text-sm mt-1">Discover the secret to finding and using your hidden strengths.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/30D158/FFFFFF?text=Story+4" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">Mindful Moments</h3>
+                        <p class="text-sm mt-1">A guide to staying present and reducing stress.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/0A84FF/FFFFFF?text=Story+5" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">The Art of Time Management</h3>
+                        <p class="text-sm mt-1">Practical tips for organizing your day and boosting productivity.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/00C0FF/FFFFFF?text=Story+6" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">Fueling Your Focus</h3>
+                        <p class="text-sm mt-1">Explore the connection between nutrition and mental clarity.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/0A84FF/FFFFFF?text=Story+7" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">Creative Problem Solving</h3>
+                        <p class="text-sm mt-1">Learn to think outside the box to solve any challenge.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/30D158/FFFFFF?text=Story+8" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">The Importance of Rest</h3>
+                        <p class="text-sm mt-1">Why taking a break is essential for long-term success.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/00C0FF/FFFFFF?text=Story+9" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">Building Confidence</h3>
+                        <p class="text-sm mt-1">Simple steps to build self-belief and tackle new opportunities.</p>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="https://placehold.co/400x225/0A84FF/FFFFFF?text=Story+10" alt="Story Thumbnail">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-[var(--primary-blue)]">The Joy of Learning</h3>
+                        <p class="text-sm mt-1">Rekindle your passion for knowledge and exploration.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="assignments-page" class="w-full h-full flex flex-col items-center justify-between p-4">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+        <main class="flex flex-col items-center flex-grow w-full max-w-lg px-4 overflow-y-auto">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">Assignments</h1>
+            <div id="assignments-list" class="w-full assignments-list">
+                </div>
+        </main>
+    </div>
+
+    <div id="new-section-page" class="w-full h-full flex flex-col items-center justify-between p-4">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+        <main class="flex flex-col items-center flex-grow w-full max-w-lg p-4">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">Play. Learn. Conquer.</h1>
+            <div id="game-div-container" class="w-full">
+                <div class="game-card">
+                    <button class="game-button">Play Word Puzzle</button>
+                </div>
+                <div class="game-card">Empty Div 2</div>
+                <div class="game-card">Empty Div 3</div>
+                <div class="game-card">Empty Div 4</div>
+            </div>
+        </main>
+    </div>
+
+    <div id="streak-page" class="w-full h-full flex flex-col items-center justify-between p-4" style="display:none;">
+        <header class="w-full flex justify-start items-center p-4">
+            <button onclick="showMainUI()" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-[var(--surface-light)] text-[var(--primary-blue)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back</span>
+            </button>
+        </header>
+
+        <main class="flex flex-col items-center justify-center flex-grow w-full max-w-lg p-4">
+            <h1 class="text-4xl text-[var(--primary-blue)] mb-8">My Streak</h1>
+            <div class="w-full profile-details-container">
+                <div class="profile-detail-item">
+                    <span class="font-bold">Current Streak:</span>
+                    <span id="streak-value" class="text-[var(--secondary-green)] text-lg">0 🔥</span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">Last Active:</span>
+                    <span id="last-active-date">Not available</span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="font-bold">Today's Usage:</span>
+                    <span id="todays-usage">0 minutes</span>
+                </div>
+            </div>
+        </main>
+
+        <div class="ignitex-logo-container">
+            <p class="text-2xl font-bold text-black">IgniteX.</p>
+            <img src="Images/IgniteX..png" alt="IgniteX Logo" class="mt-2 rounded-lg" style="width: 60px; height: 60px;">
+        </div>
+    </div>
+    <script>
+        // Word Puzzle Game Variables and Functions
+        const wordList = ["APPLE", "CODING", "PROGRAM", "PYTHON", "HTML", "JAVASCRIPT", "SCIENCE", "MATHS", "SCHOOL", "FRIEND"];
+        let currentWord = '';
+        let scrambledWord = '';
+        
+        // Streak Variables and Functions
+        let streakData = JSON.parse(localStorage.getItem('streakData')) || {
+            currentStreak: 0,
+            lastActiveDate: null,
+            dailyUsageSeconds: 0
+        };
+        let usageTimer;
+
+        function updateStreakHeader() {
+            const headerElement = document.getElementById('streak-display-header');
+            if (headerElement) {
+                headerElement.textContent = `${streakData.currentStreak} days streak ⚡️`;
+            }
+        }
+
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toDateString();
+
+            if (streakData.lastActiveDate === today) {
+                // Already active today, do nothing
+                return;
+            }
+
+            if (streakData.lastActiveDate === yesterdayString) {
+                // Continued streak
+                streakData.currentStreak++;
+            } else {
+                // Streak broken or new streak started
+                streakData.currentStreak = 1;
+            }
+            
+            streakData.lastActiveDate = today;
+            streakData.dailyUsageSeconds = 0; // Reset usage for the new day
+            localStorage.setItem('streakData', JSON.stringify(streakData));
+            updateStreakHeader();
+        }
+
+        function startUsageTimer() {
+            // Clear any existing timer to avoid duplicates
+            clearInterval(usageTimer);
+            // Start a new timer that increments daily usage every second
+            usageTimer = setInterval(() => {
+                streakData.dailyUsageSeconds++;
+                localStorage.setItem('streakData', JSON.stringify(streakData));
+            }, 1000);
+        }
+
+        function showStreakPage() {
+            setPageVisibility('streak-page');
+            updateStreakDisplay();
+        }
+
+        function updateStreakDisplay() {
+            const streakPageData = JSON.parse(localStorage.getItem('streakData')) || {
+                currentStreak: 0,
+                lastActiveDate: null,
+                dailyUsageSeconds: 0
+            };
+
+            const currentStreakElement = document.getElementById('streak-value');
+            const lastActiveElement = document.getElementById('last-active-date');
+            const todaysUsageElement = document.getElementById('todays-usage');
+
+            currentStreakElement.textContent = `${streakPageData.currentStreak} 🔥`;
+            lastActiveElement.textContent = streakPageData.lastActiveDate ? new Date(streakPageData.lastActiveDate).toLocaleDateString() : 'Not available';
+            const minutes = Math.floor(streakPageData.dailyUsageSeconds / 60);
+            const seconds = streakPageData.dailyUsageSeconds % 60;
+            todaysUsageElement.textContent = `${minutes} minutes, ${seconds} seconds`;
+        }
+
+        function scrambleWord(word) {
+            const letters = word.split('');
+            for (let i = letters.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [letters[i], letters[j]] = [letters[j], letters[i]];
+            }
+            return letters.join('');
+        }
+
+        function startNewWordPuzzle() {
+            currentWord = wordList[Math.floor(Math.random() * wordList.length)];
+            scrambledWord = scrambleWord(currentWord);
+
+            document.getElementById('word-scramble').textContent = scrambledWord;
+            document.getElementById('guess-input').value = '';
+            document.getElementById('game-result').textContent = '';
+        }
+
+        function checkWordPuzzleGuess() {
+            const guess = document.getElementById('guess-input').value.toUpperCase();
+            const resultElement = document.getElementById('game-result');
+
+            if (guess === currentWord) {
+                resultElement.textContent = "Correct! You got it right!";
+                resultElement.style.color = "var(--secondary-green)";
+            } else {
+                resultElement.textContent = "Wrong! Try again.";
+                resultElement.style.color = "var(--primary-blue)";
+            }
+        }
+
+        function showWordPuzzleGame() {
+            setPageVisibility('word-puzzle-page');
+            document.getElementById('word-puzzle-page').classList.add('active');
+            startNewWordPuzzle();
+        }
+
+        // Speed Math Race Game Variables and Functions
+        let score = 0;
+        let timeRemaining = 0;
+        let timer;
+        let currentProblem = {};
+
+        function generateMathProblem() {
+            const operators = ['+', '-', '*'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+            let num1, num2;
+
+            if (operator === '*') {
+                num1 = Math.floor(Math.random() * 10);
+                num2 = Math.floor(Math.random() * 10);
+            } else {
+                num1 = Math.floor(Math.random() * 50) + 1;
+                num2 = Math.floor(Math.random() * 50) + 1;
+                if (operator === '-') {
+                    if (num1 < num2) [num1, num2] = [num2, num1];
+                }
+            }
+
+            const problemString = `${num1} ${operator} ${num2}`;
+            let answer;
+            switch(operator) {
+                case '+': answer = num1 + num2; break;
+                case '-': answer = num1 - num2; break;
+                case '*': answer = num1 * num2; break;
+            }
+            return { problemString, answer };
+        }
+
+        function startSpeedMathGame() {
+            const timeInput = document.getElementById('time-input');
+            const userTime = parseInt(timeInput.value, 10);
+            
+            if (userTime > 0 && userTime <= 300) {
+                score = 0;
+                timeRemaining = userTime;
+                
+                document.getElementById('start-math-btn').style.display = 'none';
+                document.getElementById('time-input').style.display = 'none';
+                document.getElementById('game-running-ui').style.display = 'flex';
+                document.getElementById('math-answer').focus();
+                
+                document.getElementById('score-display').textContent = 'Score: 0';
+                startTimer();
+                nextProblem();
+            } else {
+                alert('Please enter a time limit between 1 and 300 seconds.');
+                timeInput.focus();
+            }
+        }
+
+        function nextProblem() {
+            currentProblem = generateMathProblem();
+            document.getElementById('math-problem').textContent = currentProblem.problemString;
+            document.getElementById('math-answer').value = '';
+        }
+
+        function checkMathAnswer() {
+            const userAnswer = parseInt(document.getElementById('math-answer').value, 10);
+            const resultElement = document.getElementById('math-result');
+
+            if (userAnswer === currentProblem.answer) {
+                score++;
+                resultElement.textContent = `Correct!`;
+                resultElement.style.color = "var(--secondary-green)";
+            } else {
+                resultElement.textContent = `Wrong! The correct answer was ${currentProblem.answer}.`;
+                resultElement.style.color = "var(--primary-blue)";
+            }
+            document.getElementById('score-display').textContent = `Score: ${score}`;
+            nextProblem();
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            document.getElementById('math-problem').textContent = `Game Over! Final Score: ${score}`;
+            document.getElementById('math-answer').style.display = 'none';
+            document.getElementById('game-running-ui').style.display = 'none';
+            
+            const startButton = document.getElementById('start-math-btn');
+            startButton.style.display = 'block';
+            startButton.textContent = 'Play Again';
+            startButton.disabled = true;
+
+            const timeInput = document.getElementById('time-input');
+            timeInput.style.display = 'block';
+            timeInput.value = '';
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeRemaining--;
+                document.getElementById('timer').textContent = `Time: ${timeRemaining}s`;
+                if (timeRemaining <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function showSpeedMathGame() {
+            setPageVisibility('speed-math-page');
+            document.getElementById('speed-math-page').classList.add('active');
+            
+            document.getElementById('game-running-ui').style.display = 'none';
+            const startButton = document.getElementById('start-math-btn');
+            startButton.style.display = 'block';
+            startButton.textContent = 'Start Race';
+            startButton.disabled = true;
+            
+            const timeInput = document.getElementById('time-input');
+            timeInput.style.display = 'block';
+            timeInput.value = '';
+            timeInput.focus();
+            timeInput.oninput = function() {
+                const value = parseInt(this.value, 10);
+                startButton.disabled = !(value > 0 && value <= 300);
+            };
+        }
+
+
+        // Event listeners for the games
+        document.getElementById('check-btn').addEventListener('click', checkWordPuzzleGuess);
+        document.getElementById('next-word-btn').addEventListener('click', startNewWordPuzzle);
+        document.getElementById('guess-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkWordPuzzleGuess();
+            }
+        });
+    </script>
+    <script>
+        // ============================================================================
+        // IGNITEX UNIFIED DASHBOARD - COMPREHENSIVE LEARNING MANAGEMENT SYSTEM
+        // ============================================================================
+
+        // Global State Management
+        const AppState = {
+            currentUser: null,
+            isAuthenticated: false,
+            currentRole: null,
+            currentTab: null
+        };
+
+        // Data Management
+        const DataManager = {
+            // Get users from localStorage
+            getUsers() {
+                return JSON.parse(localStorage.getItem('users')) || {};
+            },
+
+            // Save users to localStorage
+            saveUsers(users) {
+                localStorage.setItem('users', JSON.stringify(users));
+            },
+
+            // Get current user
+            getCurrentUser() {
+                return JSON.parse(localStorage.getItem('currentUser'));
+            },
+
+            // Save current user
+            saveCurrentUser(user) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                AppState.currentUser = user;
+                AppState.isAuthenticated = true;
+                AppState.currentRole = user.role;
+            },
+
+            // Clear current user
+            clearCurrentUser() {
+                localStorage.removeItem('currentUser');
+                AppState.currentUser = null;
+                AppState.isAuthenticated = false;
+                AppState.currentRole = null;
+            },
+
+            // Get assignments
+            getAssignments() {
+                return JSON.parse(localStorage.getItem('assignments')) || [];
+            },
+
+            // Save assignments
+            saveAssignments(assignments) {
+                localStorage.setItem('assignments', JSON.stringify(assignments));
+            },
+
+            // Get notes
+            getNotes() {
+                return JSON.parse(localStorage.getItem('notes')) || [];
+            },
+
+            // Save notes
+            saveNotes(notes) {
+                localStorage.setItem('notes', JSON.stringify(notes));
+            },
+
+            // Get marks
+            getMarks() {
+                return JSON.parse(localStorage.getItem('marks')) || {};
+            },
+
+            // Save marks
+            saveMarks(marks) {
+                localStorage.setItem('marks', JSON.stringify(marks));
+            },
+
+            // Get comments
+            getComments() {
+                return JSON.parse(localStorage.getItem('comments')) || {};
+            },
+
+            // Save comments
+            saveComments(comments) {
+                localStorage.setItem('comments', JSON.stringify(comments));
+            }
+        };
+
+        // UI Management
+        const UIManager = {
+            // Show element
+            show(elementId) {
+                const element = document.getElementById(elementId);
+                if (element) element.classList.remove('hidden');
+            },
+
+            // Hide element
+            hide(elementId) {
+                const element = document.getElementById(elementId);
+                if (element) element.classList.add('hidden');
+            },
+
+            // Show error message
+            showError(elementId, message) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = message;
+                    element.classList.remove('hidden');
+                    element.classList.add('text-error');
+                }
+            },
+
+            // Show success message
+            showSuccess(elementId, message) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = message;
+                    element.classList.remove('hidden');
+                    element.classList.add('text-success');
+                }
+            },
+
+            // Clear message
+            clearMessage(elementId) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = '';
+                    element.classList.add('hidden');
+                    element.classList.remove('text-error', 'text-success');
+                }
+            }
+        };
+
+        // Authentication System
+        const AuthManager = {
+            // Initialize authentication
+            init() {
+                const currentUser = DataManager.getCurrentUser();
+                if (currentUser) {
+                    DataManager.saveCurrentUser(currentUser);
+                    this.showDashboard();
+                } else {
+                    this.showAuth();
+                }
+            },
+
+            // Show authentication page
+            showAuth() {
+                UIManager.hide('splash-screen');
+                UIManager.hide('main-dashboard');
+                UIManager.show('auth-page');
+            },
+
+            // Show dashboard
+            showDashboard() {
+                UIManager.hide('splash-screen');
+                UIManager.hide('auth-page');
+                UIManager.show('main-dashboard');
+                DashboardManager.init();
+            },
+
+            // Login user
+            login(username, password) {
+                const users = DataManager.getUsers();
+                const user = users[username];
+
+                if (user && user.password === password) {
+                    user.username = username; // Add username to user object
+                    DataManager.saveCurrentUser(user);
+                    this.showDashboard();
+                    return true;
+                } else {
+                    UIManager.showError('login-error', 'Invalid username or password.');
+                    return false;
+                }
+            },
+
+            // Register user
+            register(userData) {
+                const users = DataManager.getUsers();
+                
+                if (users[userData.username]) {
+                    UIManager.showError('register-error', 'Username already exists.');
+                    return false;
+                }
+
+                users[userData.username] = {
+                    name: userData.name,
+                    password: userData.password,
+                    role: userData.role,
+                    ...(userData.role === 'student' && {
+                        class: userData.class,
+                        favSubject: userData.favSubject,
+                        aim: userData.aim
+                    })
+                };
+
+                DataManager.saveUsers(users);
+                UIManager.showSuccess('register-error', 'Registration successful! You can now log in.');
+                
+                setTimeout(() => {
+                    this.showLoginForm();
+                }, 2000);
+                
+                return true;
+            },
+
+            // Show login form
+            showLoginForm() {
+                UIManager.show('login-form-container');
+                UIManager.hide('register-form-container');
+                UIManager.clearMessage('register-error');
+            },
+
+            // Show register form
+            showRegisterForm() {
+                UIManager.hide('login-form-container');
+                UIManager.show('register-form-container');
+                UIManager.clearMessage('login-error');
+            },
+
+            // Logout user
+            logout() {
+                DataManager.clearCurrentUser();
+                this.showAuth();
+                // Reset forms
+                document.getElementById('login-form').reset();
+                document.getElementById('register-form').reset();
+                UIManager.clearMessage('login-error');
+                UIManager.clearMessage('register-error');
+            }
+        };
+
+        // Dashboard Management
+        const DashboardManager = {
+            // Initialize dashboard
+            init() {
+                this.setupHeader();
+                this.setupNavigation();
+                this.loadRoleDashboard();
+            },
+
+            // Setup header
+            setupHeader() {
+                const user = AppState.currentUser;
+                document.getElementById('user-welcome').textContent = `Welcome, ${user.name} (${user.role.charAt(0).toUpperCase() + user.role.slice(1)})`;
+            },
+
+            // Setup navigation based on role
+            setupNavigation() {
+                const navTabs = document.getElementById('navigation-tabs');
+                navTabs.innerHTML = '';
+
+                const tabs = this.getTabsForRole(AppState.currentRole);
+                
+                tabs.forEach((tab, index) => {
+                    const tabElement = document.createElement('button');
+                    tabElement.className = 'nav-tab' + (index === 0 ? ' active' : '');
+                    tabElement.textContent = tab.label;
+                    tabElement.onclick = () => this.showTab(tab.id);
+                    navTabs.appendChild(tabElement);
+                });
+
+                // Show first tab by default
+                if (tabs.length > 0) {
+                    this.showTab(tabs[0].id);
+                }
+            },
+
+            // Get tabs for specific role
+            getTabsForRole(role) {
+                const roleTabs = {
+                    student: [
+                        { id: 'student-overview', label: 'Overview' },
+                        { id: 'student-assignments', label: 'Assignments' },
+                        { id: 'student-notes', label: 'Notes' },
+                        { id: 'student-marks', label: 'My Marks' },
+                        { id: 'student-games', label: 'Games' }
+                    ],
+                    teacher: [
+                        { id: 'teacher-overview', label: 'Overview' },
+                        { id: 'teacher-students', label: 'Students' },
+                        { id: 'teacher-assignments', label: 'Create Assignment' },
+                        { id: 'teacher-notes', label: 'Post Notes' },
+                        { id: 'teacher-marks', label: 'Grade Students' },
+                        { id: 'teacher-comments', label: 'Parent Messages' }
+                    ],
+                    parent: [
+                        { id: 'parent-overview', label: 'Overview' },
+                        { id: 'parent-assignments', label: "Child's Assignments" },
+                        { id: 'parent-marks', label: "Child's Marks" },
+                        { id: 'parent-communication', label: 'Contact Teacher' }
+                    ]
+                };
+                return roleTabs[role] || [];
+            },
+
+            // Show specific tab
+            showTab(tabId) {
+                // Hide all role dashboards and tab contents
+                document.querySelectorAll('.role-dashboard').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                
+                // Update active tab
+                document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+                event.target?.classList.add('active');
+
+                // Show appropriate role dashboard and tab
+                const role = AppState.currentRole;
+                UIManager.show(`${role}-dashboard`);
+                UIManager.show(tabId);
+
+                AppState.currentTab = tabId;
+                this.loadTabContent(tabId);
+            },
+
+            // Load role-specific dashboard
+            loadRoleDashboard() {
+                const role = AppState.currentRole;
+                
+                // Hide all role dashboards
+                document.querySelectorAll('.role-dashboard').forEach(el => el.classList.add('hidden'));
+                
+                // Show current role dashboard
+                UIManager.show(`${role}-dashboard`);
+                
+                // Load role-specific content
+                switch (role) {
+                    case 'student':
+                        StudentDashboard.init();
+                        break;
+                    case 'teacher':
+                        TeacherDashboard.init();
+                        break;
+                    case 'parent':
+                        ParentDashboard.init();
+                        break;
+                }
+            },
+
+            // Load content for specific tab
+            loadTabContent(tabId) {
+                switch (tabId) {
+                    case 'student-overview':
+                        StudentDashboard.loadOverview();
+                        break;
+                    case 'student-assignments':
+                        StudentDashboard.loadAssignments();
+                        break;
+                    case 'student-notes':
+                        StudentDashboard.loadNotes();
+                        break;
+                    case 'student-marks':
+                        StudentDashboard.loadMarks();
+                        break;
+                    case 'teacher-overview':
+                        TeacherDashboard.loadOverview();
+                        break;
+                    case 'teacher-students':
+                        TeacherDashboard.loadStudents();
+                        break;
+                    case 'teacher-comments':
+                        TeacherDashboard.loadComments();
+                        break;
+                    case 'parent-overview':
+                        ParentDashboard.loadOverview();
+                        break;
+                    case 'parent-assignments':
+                        ParentDashboard.loadAssignments();
+                        break;
+                    case 'parent-marks':
+                        ParentDashboard.loadMarks();
+                        break;
+                }
+            }
+        };
+
+        // Student Dashboard
+        const StudentDashboard = {
+            init() {
+                this.loadOverview();
+            },
+
+            loadOverview() {
+                const assignments = DataManager.getAssignments();
+                const notes = DataManager.getNotes();
+                const marks = DataManager.getMarks();
+                const userMarks = marks[AppState.currentUser.username] || [];
+
+                document.getElementById('student-assignments-count').textContent = assignments.length;
+                document.getElementById('student-notes-count').textContent = notes.length;
+                document.getElementById('student-marks-count').textContent = userMarks.length;
+            },
+
+            loadAssignments() {
+                const assignments = DataManager.getAssignments();
+                const container = document.getElementById('student-assignments-list');
+                
+                if (assignments.length === 0) {
+                    container.innerHTML = '<div class="card"><p class="text-center">No assignments available yet.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = assignments.map(assignment => `
+                    <div class="card">
+                        <h3 class="text-xl font-bold text-primary">${assignment.title}</h3>
+                        <p class="text-secondary mb-2">Subject: ${assignment.subject}</p>
+                        <p class="text-sm">Due Date: ${assignment.dueDate}</p>
+                        ${assignment.description ? `<p class="mt-2">${assignment.description}</p>` : ''}
+                    </div>
+                `).join('');
+            },
+
+            loadNotes() {
+                const notes = DataManager.getNotes();
+                const container = document.getElementById('student-notes-list');
+                
+                if (notes.length === 0) {
+                    container.innerHTML = '<div class="card"><p class="text-center">No notes available yet.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = notes.map(note => `
+                    <div class="card">
+                        <h3 class="text-xl font-bold text-primary">${note.title}</h3>
+                        <p class="mt-2">${note.content}</p>
+                    </div>
+                `).join('');
+            },
+
+            loadMarks() {
+                const marks = DataManager.getMarks();
+                const userMarks = marks[AppState.currentUser.username] || [];
+                const container = document.getElementById('student-marks-list');
+                
+                if (userMarks.length === 0) {
+                    container.innerHTML = '<div class="card"><p class="text-center">No marks available yet.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="card">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Score</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${userMarks.map(mark => `
+                                    <tr>
+                                        <td>${mark.subject}</td>
+                                        <td>${mark.score}/100</td>
+                                        <td class="font-bold ${this.getGradeColor(mark.score)}">${this.getGrade(mark.score)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            },
+
+            getGrade(score) {
+                if (score >= 90) return 'A+';
+                if (score >= 80) return 'A';
+                if (score >= 70) return 'B';
+                if (score >= 60) return 'C';
+                if (score >= 50) return 'D';
+                return 'F';
+            },
+
+            getGradeColor(score) {
+                if (score >= 80) return 'text-success';
+                if (score >= 60) return 'text-warning';
+                return 'text-error';
+            }
+        };
+
+        // Teacher Dashboard
+        const TeacherDashboard = {
+            init() {
+                this.setupForms();
+                this.loadOverview();
+            },
+
+            setupForms() {
+                // Assignment form
+                document.getElementById('teacher-assignment-form').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.createAssignment();
+                };
+
+                // Notes form
+                document.getElementById('teacher-notes-form').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.postNotes();
+                };
+
+                // Marks form
+                document.getElementById('teacher-marks-form').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.submitMarks();
+                };
+            },
+
+            loadOverview() {
+                // Load quick stats or recent activities
+            },
+
+            loadStudents() {
+                const users = DataManager.getUsers();
+                const students = Object.keys(users)
+                    .filter(username => users[username].role === 'student')
+                    .map(username => ({ username, ...users[username] }));
+
+                const container = document.getElementById('teacher-students-list');
+                const marksSelect = document.getElementById('marks-student');
+                
+                // Populate marks dropdown
+                marksSelect.innerHTML = '<option value="" disabled selected>Select Student</option>';
+                students.forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student.username;
+                    option.textContent = student.name;
+                    marksSelect.appendChild(option);
+                });
+
+                if (students.length === 0) {
+                    container.innerHTML = '<div class="card"><p class="text-center">No students registered yet.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = students.map(student => {
+                    const marks = DataManager.getMarks();
+                    const studentMarks = marks[student.username] || [];
+                    
+                    return `
+                        <div class="card">
+                            <h3 class="text-xl font-bold text-primary">${student.name}</h3>
+                            <p class="text-secondary">Username: ${student.username}</p>
+                            ${student.class ? `<p class="text-sm">Class: ${student.class}</p>` : ''}
+                            ${student.favSubject ? `<p class="text-sm">Favorite Subject: ${student.favSubject}</p>` : ''}
+                            <div class="mt-4">
+                                <h4 class="font-bold text-secondary mb-2">Recent Marks:</h4>
+                                ${studentMarks.length > 0 ? `
+                                    <div class="flex gap-2 flex-wrap">
+                                        ${studentMarks.slice(-3).map(mark => `
+                                            <span class="bg-gray-200 px-2 py-1 rounded text-sm">
+                                                ${mark.subject}: ${mark.score}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p class="text-sm text-gray-500">No marks yet</p>'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            loadComments() {
+                const comments = DataManager.getComments();
+                const users = DataManager.getUsers();
+                const container = document.getElementById('teacher-comments-list');
+                
+                const commentEntries = Object.entries(comments);
+                if (commentEntries.length === 0) {
+                    container.innerHTML = '<div class="card"><p class="text-center">No comments from parents yet.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = commentEntries.map(([studentUsername, studentComments]) => {
+                    const studentName = users[studentUsername]?.name || studentUsername;
+                    return studentComments.map(comment => `
+                        <div class="card">
+                            <h3 class="text-lg font-bold text-primary">${studentName}'s Parent:</h3>
+                            <p class="mt-2">${comment}</p>
+                        </div>
+                    `).join('');
+                }).join('');
+            },
+
+            createAssignment() {
+                const title = document.getElementById('assignment-title').value;
+                const subject = document.getElementById('assignment-subject').value;
+                const dueDate = document.getElementById('assignment-due-date').value;
+                const description = document.getElementById('assignment-description').value;
+
+                const assignments = DataManager.getAssignments();
+                assignments.push({ title, subject, dueDate, description, createdBy: AppState.currentUser.username });
+                DataManager.saveAssignments(assignments);
+
+                alert('Assignment created successfully!');
+                document.getElementById('teacher-assignment-form').reset();
+            },
+
+            postNotes() {
+                const title = document.getElementById('note-title').value;
+                const content = document.getElementById('note-content').value;
+
+                const notes = DataManager.getNotes();
+                notes.push({ title, content, createdBy: AppState.currentUser.username });
+                DataManager.saveNotes(notes);
+
+                alert('Notes posted successfully!');
+                document.getElementById('teacher-notes-form').reset();
+            },
+
+            submitMarks() {
+                const studentUsername = document.getElementById('marks-student').value;
+                const subject = document.getElementById('marks-subject').value;
+                const score = parseInt(document.getElementById('marks-score').value);
+
+                const marks = DataManager.getMarks();
+                if (!marks[studentUsername]) {
+                    marks[studentUsername] = [];
+                }
+                marks[studentUsername].push({ subject, score, date: new Date().toLocaleDateString() });
+                DataManager.saveMarks(marks);
+
+                alert(`Marks submitted for ${subject}: ${score}/100`);
+                document.getElementById('teacher-marks-form').reset();
+            }
+        };
+
+        // Parent Dashboard
+        const ParentDashboard = {
+            init() {
+                this.setupForms();
+                this.loadOverview();
+            },
+
+            setupForms() {
+                // Link child form
+                document.getElementById('link-child-form').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.linkChild();
+                };
+
+                // Comment form
+                document.getElementById('parent-comment-form').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.sendComment();
+                };
+            },
+
+            loadOverview() {
+                const currentUser = AppState.currentUser;
+                
+                if (currentUser.linkedChild) {
+                    const users = DataManager.getUsers();
+                    const child = users[currentUser.linkedChild];
+                    
+                    if (child) {
+                        document.getElementById('child-name').textContent = `Child: ${child.name} (${currentUser.linkedChild})`;
+                        UIManager.hide('link-child-section');
+                        UIManager.show('child-performance-section');
+                    } else {
+                        UIManager.show('link-child-section');
+                        UIManager.hide('child-performance-section');
+                    }
+                } else {
+                    UIManager.show('link-child-section');
+                    UIManager.hide('child-performance-section');
+                }
+            },
+
+            linkChild() {
+                const childUsername = document.getElementById('child-username').value;
+                const users = DataManager.getUsers();
+                const child = users[childUsername];
+
+                if (child && child.role === 'student') {
+                    // Update current user
+                    AppState.currentUser.linkedChild = childUsername;
+                    DataManager.saveCurrentUser(AppState.currentUser);
+                    
+                    // Update user in database
+                    users[AppState.currentUser.username].linkedChild = childUsername;
+                    DataManager.saveUsers(users);
+
+                    UIManager.showSuccess('link-status', `Successfully linked to ${child.name}`);
+                    
+                    setTimeout(() => {
+                        this.loadOverview();
+                    }, 1000);
+                } else {
+                    UIManager.showError('link-status', 'Invalid username or not a student account.');
+                }
+            },
+
+            loadAssignments() {
+                const currentUser = AppState.currentUser;
+                
+                if (!currentUser.linkedChild) {
+                    document.getElementById('parent-assignments-list').innerHTML = 
+                        '<div class="card"><p class="text-center">Please link your child first.</p></div>';
+                    return;
+                }
+
+                const assignments = DataManager.getAssignments();
+                const container = document.getElementById('parent-assignments-list');
+                
+                if (assignments.length === 0) {
+                    container.innerHTML = '<div class="card"><p class="text-center">No assignments available.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = assignments.map(assignment => `
+                    <div class="card">
+                        <h3 class="text-xl font-bold text-primary">${assignment.title}</h3>
+                        <p class="text-secondary mb-2">Subject: ${assignment.subject}</p>
+                        <p class="text-sm">Due Date: ${assignment.dueDate}</p>
+                        ${assignment.description ? `<p class="mt-2">${assignment.description}</p>` : ''}
+                    </div>
+                `).join('');
+            },
+
+            loadMarks() {
+                const currentUser = AppState.currentUser;
+                
+                if (!currentUser.linkedChild) {
+                    document.getElementById('parent-marks-list').innerHTML = 
+                        '<div class="card"><p class="text-center">Please link your child first.</p></div>';
+                    return;
+                }
+
+                const marks = DataManager.getMarks();
+                const childMarks = marks[currentUser.linkedChild] || [];
+                const container = document.getElementById('parent-marks-list');
+                
+                if (childMarks.length === 0) {
+                    container.innerHTML = '<div class="card"><p class="text-center">No marks available yet.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="card">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Score</th>
+                                    <th>Grade</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${childMarks.map(mark => `
+                                    <tr>
+                                        <td>${mark.subject}</td>
+                                        <td>${mark.score}/100</td>
+                                        <td class="font-bold ${StudentDashboard.getGradeColor(mark.score)}">${StudentDashboard.getGrade(mark.score)}</td>
+                                        <td>${mark.date || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            },
+
+            sendComment() {
+                const currentUser = AppState.currentUser;
+                const comment = document.getElementById('parent-comment').value;
+                
+                if (!currentUser.linkedChild) {
+                    alert('Please link your child first.');
+                    return;
+                }
+
+                const comments = DataManager.getComments();
+                if (!comments[currentUser.linkedChild]) {
+                    comments[currentUser.linkedChild] = [];
+                }
+                comments[currentUser.linkedChild].push(comment);
+                DataManager.saveComments(comments);
+
+                alert('Message sent to teacher successfully!');
+                document.getElementById('parent-comment-form').reset();
+            }
+        };
+
+        // Profile Management
+        const ProfileManager = {
+            init() {
+                // Profile modal events
+                document.getElementById('profile-btn').onclick = () => UIManager.show('profile-modal');
+                document.getElementById('close-profile-modal').onclick = () => UIManager.hide('profile-modal');
+                
+                // Change password events
+                document.getElementById('change-password-btn').onclick = () => {
+                    UIManager.hide('profile-modal');
+                    UIManager.show('password-modal');
+                };
+                document.getElementById('cancel-password-change').onclick = () => UIManager.hide('password-modal');
+                document.getElementById('change-password-form').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.changePassword();
+                };
+                
+                // Change username events
+                document.getElementById('change-username-btn').onclick = () => {
+                    UIManager.hide('profile-modal');
+                    UIManager.show('username-modal');
+                };
+                document.getElementById('cancel-username-change').onclick = () => UIManager.hide('username-modal');
+                document.getElementById('change-username-form').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.changeUsername();
+                };
+                
+                // Delete account
+                document.getElementById('delete-account-btn').onclick = () => this.deleteAccount();
+            },
+
+            changePassword() {
+                const oldPassword = document.getElementById('old-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-new-password').value;
+
+                if (oldPassword !== AppState.currentUser.password) {
+                    UIManager.showError('password-message', 'Current password is incorrect.');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    UIManager.showError('password-message', 'New passwords do not match.');
+                    return;
+                }
+
+                const users = DataManager.getUsers();
+                users[AppState.currentUser.username].password = newPassword;
+                DataManager.saveUsers(users);
+                
+                AppState.currentUser.password = newPassword;
+                DataManager.saveCurrentUser(AppState.currentUser);
+
+                UIManager.showSuccess('password-message', 'Password changed successfully!');
+                setTimeout(() => {
+                    UIManager.hide('password-modal');
+                    document.getElementById('change-password-form').reset();
+                    UIManager.clearMessage('password-message');
+                }, 2000);
+            },
+
+            changeUsername() {
+                const newUsername = document.getElementById('new-username').value;
+                const confirmPassword = document.getElementById('confirm-password-username').value;
+
+                if (confirmPassword !== AppState.currentUser.password) {
+                    UIManager.showError('username-message', 'Password is incorrect.');
+                    return;
+                }
+
+                const users = DataManager.getUsers();
+                if (users[newUsername]) {
+                    UIManager.showError('username-message', 'Username is already taken.');
+                    return;
+                }
+
+                const oldUsername = AppState.currentUser.username;
+                const userData = users[oldUsername];
+                
+                // Update username in users
+                delete users[oldUsername];
+                users[newUsername] = userData;
+                DataManager.saveUsers(users);
+                
+                // Update related data
+                this.updateRelatedData(oldUsername, newUsername);
+                
+                // Update current user
+                AppState.currentUser.username = newUsername;
+                DataManager.saveCurrentUser(AppState.currentUser);
+
+                UIManager.showSuccess('username-message', 'Username changed successfully!');
+                setTimeout(() => {
+                    UIManager.hide('username-modal');
+                    document.getElementById('change-username-form').reset();
+                    UIManager.clearMessage('username-message');
+                    DashboardManager.setupHeader();
+                }, 2000);
+            },
+
+            updateRelatedData(oldUsername, newUsername) {
+                // Update marks
+                const marks = DataManager.getMarks();
+                if (marks[oldUsername]) {
+                    marks[newUsername] = marks[oldUsername];
+                    delete marks[oldUsername];
+                    DataManager.saveMarks(marks);
+                }
+
+                // Update comments
+                const comments = DataManager.getComments();
+                if (comments[oldUsername]) {
+                    comments[newUsername] = comments[oldUsername];
+                    delete comments[oldUsername];
+                    DataManager.saveComments(comments);
+                }
+
+                // Update parent links
+                const users = DataManager.getUsers();
+                Object.keys(users).forEach(username => {
+                    if (users[username].linkedChild === oldUsername) {
+                        users[username].linkedChild = newUsername;
+                    }
+                });
+                DataManager.saveUsers(users);
+            },
+
+            deleteAccount() {
+                if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                    return;
+                }
+
+                const users = DataManager.getUsers();
+                const username = AppState.currentUser.username;
+                
+                // Remove user data
+                delete users[username];
+                DataManager.saveUsers(users);
+                
+                // Clean up related data
+                const marks = DataManager.getMarks();
+                delete marks[username];
+                DataManager.saveMarks(marks);
+                
+                const comments = DataManager.getComments();
+                delete comments[username];
+                DataManager.saveComments(comments);
+
+                alert('Your account has been deleted.');
+                AuthManager.logout();
+            }
+        };
+
+        // Memory Game Integration
+        function openMemoryGame() {
+            window.open('Memorymatch.html', '_blank');
+        }
+
+        // Global function to show tabs (for onclick events)
+        function showTab(tabId) {
+            DashboardManager.showTab(tabId);
+        }
+
+        // Application Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show splash screen first
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('fade-out');
+                setTimeout(() => {
+                    UIManager.hide('splash-screen');
+                    AuthManager.init();
+                }, 1000);
+            }, 2000);
+
+            // Setup authentication forms
+            document.getElementById('login-form').onsubmit = (e) => {
+                e.preventDefault();
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+                AuthManager.login(username, password);
+            };
+
+            document.getElementById('register-form').onsubmit = (e) => {
+                e.preventDefault();
+                const formData = {
+                    name: document.getElementById('register-name').value,
+                    username: document.getElementById('register-username').value,
+                    password: document.getElementById('register-password').value,
+                    confirmPassword: document.getElementById('register-confirm-password').value,
+                    role: document.getElementById('register-role').value,
+                    class: document.getElementById('student-class').value,
+                    favSubject: document.getElementById('student-fav-subject').value,
+                    aim: document.getElementById('student-aim').value
+                };
+
+                if (formData.password !== formData.confirmPassword) {
+                    UIManager.showError('register-error', 'Passwords do not match.');
+                    return;
+                }
+
+                AuthManager.register(formData);
+            };
+
+            // Toggle between login and register
+            document.getElementById('show-register').onclick = () => AuthManager.showRegisterForm();
+            document.getElementById('show-login').onclick = () => AuthManager.showLoginForm();
+
+            // Show student fields when student role is selected
+            document.getElementById('register-role').onchange = (e) => {
+                if (e.target.value === 'student') {
+                    UIManager.show('student-fields');
+                } else {
+                    UIManager.hide('student-fields');
+                }
+            };
+
+            // Setup logout
+            document.getElementById('logout-btn').onclick = () => AuthManager.logout();
+
+            // Initialize profile manager
+            ProfileManager.init();
+
+            // Add splash animation
+            setTimeout(() => {
+                const container = document.getElementById('ignitex-animation-container');
+                container.classList.add('show');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+            '10/31/2025': 'Halloween',
+            '11/5/2025': 'Chhat Puja',
+            '11/24/2025': 'Guru Nanak Jayanti, Guru Tegh Bahadur\'s Martyrdom Day',
+            '11/28/2025': 'Thanksgiving',
+            '12/24/2025': 'Christmas Eve',
+            '12/25/2025': 'Christmas'
+        };
+        
+        let userEvents = {};
+        let selectedDateString = '';
+
+        const assignments = [
+            { title: "Math Homework: Chapter 5", subject: "Mathematics", dueDate: "October 10, 2025" },
+            { title: "Science Project: Solar System", subject: "Science", dueDate: "October 15, 2025" },
+            { title: "History Essay: World War II", subject: "History", dueDate: "October 20, 2025" },
+        ];
+        
+        function showEventModal(dateString) {
+            selectedDateString = dateString;
+            const modal = document.getElementById('event-modal-overlay');
+            const modalDate = document.getElementById('modal-date');
+            const modalEvents = document.getElementById('modal-events');
+            
+            modalDate.textContent = `Events for ${new Date(dateString).toDateString()}`;
+            
+            const allEvents = (events[dateString] || '');
+            const userEventsForDate = userEvents[dateString] || [];
+            
+            let eventsHtml = '';
+            if (allEvents.length > 0) {
+                eventsHtml += `<p class="text-[var(--primary-blue)] font-bold">${allEvents}</p>`;
+            }
+            if (userEventsForDate.length > 0) {
+                userEventsForDate.forEach(event => {
+                    eventsHtml += `<p class="text-sm mt-1">- ${event.title} at ${event.time}</p>`;
+                });
+            }
+
+            modalEvents.innerHTML = eventsHtml || 'No events.';
+            
+            modal.classList.remove('hidden');
+        }
+
+        function hideEventModal() {
+            const modal = document.getElementById('event-modal-overlay');
+            modal.classList.add('hidden');
+            document.getElementById('new-event-title').value = '';
+            document.getElementById('new-event-time').value = '';
+        }
+
+        function addEvent() {
+            const eventTitle = document.getElementById('new-event-title').value;
+            const eventTime = document.getElementById('new-event-time').value;
+            
+            if (eventTitle && eventTime) {
+                if (!userEvents[selectedDateString]) {
+                    userEvents[selectedDateString] = [];
+                }
+                
+                userEvents[selectedDateString].push({ title: eventTitle, time: eventTime });
+
+                hideEventModal();
+                renderCalendar();
+            }
+        }
+
+        let lastQuoteIndex = -1;
+
+        function getRandomQuote() {
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * quotes.length);
+            } while (randomIndex === lastQuoteIndex);
+            lastQuoteIndex = randomIndex;
+            return quotes[randomIndex];
+        }
+
+        function saveQuote(quote) {
+            const date = new Date().toLocaleDateString();
+            const storedQuotes = JSON.parse(localStorage.getItem('previousQuotes')) || [];
+            
+            const existingQuoteIndex = storedQuotes.findIndex(q => q.date === date);
+
+            if (existingQuoteIndex !== -1) {
+                storedQuotes[existingQuoteIndex].quote = quote;
+            } else {
+                storedQuotes.push({ date, quote });
+            }
+
+            localStorage.setItem('previousQuotes', JSON.stringify(storedQuotes));
+            renderPreviousQuotes();
+        }
+
+        function renderPreviousQuotes() {
+            const quotesListContainer = document.getElementById('quotes-list-container');
+            if (!quotesListContainer) return;
+
+            const storedQuotes = JSON.parse(localStorage.getItem('previousQuotes')) || [];
+            quotesListContainer.innerHTML = '';
+            
+            if (storedQuotes.length === 0) {
+                quotesListContainer.innerHTML = '<p class="text-center text-gray-500">No previous quotes yet. Get your first quote!</p>';
+                return;
+            }
+
+            storedQuotes.reverse().forEach(item => {
+                const quoteDiv = document.createElement('div');
+                quoteDiv.classList.add('previous-quote', 'mb-2');
+                quoteDiv.innerHTML = `
+                    <p class="font-bold text-sm text-[var(--primary-blue)]">${item.date}</p>
+                    <p class="text-sm italic text-[var(--text-dark)]">${item.quote.quote}</p>
+                    <p class="text-xs text-gray-600">- ${item.quote.author}</p>
+                `;
+                quotesListContainer.appendChild(quoteDiv);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const getQuoteBtn = document.getElementById('get-quote-btn');
+            if (getQuoteBtn) {
+                getQuoteBtn.addEventListener('click', () => {
+                    const quote = getRandomQuote();
+                    document.getElementById('quote-text').textContent = `"${quote.quote}"`;
+                    document.getElementById('quote-author').textContent = `- ${quote.author}`;
+                    saveQuote(quote);
+                });
+            }
+        });
+
+        function ringBell() {
+            const bellButton = document.getElementById('notification-button');
+            if (!bellButton.classList.contains('ringing')) {
+                bellButton.classList.add('ringing');
+                setTimeout(() => {
+                    bellButton.classList.remove('ringing');
+                }, 1000);
+            }
+        }
+
+        function playGif(element) {
+            const img = element.querySelector('img');
+            const gifSrc = img.getAttribute('data-gif-src');
+            const staticSrc = img.src;
+            if (!element.classList.contains('is-playing')) {
+                element.classList.add('is-playing');
+                img.src = gifSrc;
+                setTimeout(() => {
+                    img.src = staticSrc;
+                    element.classList.remove('is-playing');
+                }, 2100);
+            }
+        }
+        
+        function showQuotesPage() {
+            setPageVisibility('quotes-page');
+            renderPreviousQuotes();
+        }
+
+        function showStoriesPage() {
+            setPageVisibility('stories-page');
+        }
+
+        function showAssignmentsPage() {
+            setPageVisibility('assignments-page');
+            renderAssignments();
+        }
+        
+        // New function to show the new section
+        function showNewSectionPage() {
+            setPageVisibility('new-section-page');
+        }
+
+        // New function to show the games page
+        function showGamesPage() {
+            setPageVisibility('games-page');
+        }
+
+        function renderAssignments() {
+            const assignmentsListContainer = document.getElementById('assignments-list');
+            if (!assignmentsListContainer) return;
+
+            assignmentsListContainer.innerHTML = '';
+
+            if (assignments.length === 0) {
+                assignmentsListContainer.innerHTML = '<p class="text-center text-gray-500">You have no pending assignments!</p>';
+                return;
+            }
+
+            assignments.forEach(assignment => {
+                const assignmentDiv = document.createElement('div');
+                assignmentDiv.classList.add('assignment-item');
+                assignmentDiv.innerHTML = `
+                    <p class="assignment-title">${assignment.title}</p>
+                    <p class="assignment-subject">${assignment.subject}</p>
+                    <p class="assignment-duedate">Due: ${assignment.dueDate}</p>
+                `;
+                assignmentsListContainer.appendChild(assignmentDiv);
+            });
+        }
+
+
+        function showMainUI() {
+            setPageVisibility('main-ui');
+            
+            const storedDetails = JSON.parse(localStorage.getItem('userDetails'));
+            if (storedDetails && storedDetails.favColor) {
+                updateProfileIconColor(storedDetails.favColor);
+            }
+        }
+
+        function handleMainButtonClick(id) {
+            if (id === 'main-btn-1') {
+                showWordPuzzleGame();
+            } else if (id === 'main-btn-2') {
+                showSpeedMathGame();
+            } else if (id === 'main-btn-3') {
+                alert('Explore button clicked! (Functionality to be added)');
+            }
+        }
+
+        
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            const currentMonthYear = document.getElementById('current-month-year');
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+            const today = new Date();
+            const todayDate = today.getDate();
+            const todayMonth = today.getMonth();
+            const todayYear = today.getFullYear();
+
+            currentMonthYear.textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+            calendarGrid.innerHTML = `
+                <span class="day-header">S</span>
+                <span class="day-header">M</span>
+                <span class="day-header">T</span>
+                <span class="day-header">W</span>
+                <span class="day-header">T</span>
+                <span class="day-header">F</span>
+                <span class="day-header">S</span>
+            `;
+
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.classList.add('calendar-day');
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('calendar-day');
+                dayDiv.textContent = day;
+
+                const dateString = `${currentMonth + 1}/${day}/${currentYear}`;
+                const allEvents = events[dateString];
+                const userEventsForDate = userEvents[dateString] || [];
+                const hasEvent = allEvents || userEventsForDate.length > 0;
+                
+                if (hasEvent) {
+                    const eventSpan = document.createElement('span');
+                    eventSpan.classList.add('calendar-event');
+                    if (allEvents) {
+                        eventSpan.textContent = allEvents.split(',')[0];
+                    } else if (userEventsForDate.length > 0) {
+                        eventSpan.textContent = userEventsForDate[0].title;
+                    }
+                    dayDiv.appendChild(eventSpan);
+                }
+                
+                if (day === todayDate && currentMonth === todayMonth && currentYear === todayYear) {
+                    dayDiv.classList.add('current-day');
+                }
+
+                dayDiv.onclick = () => showEventModal(dateString);
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            const todayDateString = `${todayMonth + 1}/${todayDate}/${todayYear}`;
+            const eventsList = document.getElementById('events-list');
+            const todayUserEvents = userEvents[todayDateString] || [];
+            
+            let todayEventsHtml = '';
+            if (events[todayDateString]) {
+                    todayEventsHtml += `<p class="font-bold">${events[todayDateString]}</p>`;
+            }
+            if (todayUserEvents.length > 0) {
+                todayEventsHtml += `<p class="text-sm mt-1">- ${todayUserEvents[0].title} at ${todayUserEvents[0].time}</p>`;
+            }
+            
+            eventsList.innerHTML = todayEventsHtml || 'No events for today.';
+        }
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        // Function to show the calendar page and hide the other pages
+        function showCalendarPage() {
+            setPageVisibility('calendar-page');
+            renderCalendar();
+        }
+
+        // Profile Page functions
+        function showProfilePage() {
+            setPageVisibility('profile-page');
+            renderProfileDetails();
+        }
+
+        function renderProfileDetails() {
+            const storedDetails = JSON.parse(localStorage.getItem('userDetails'));
+            const profileDetails = document.getElementById('profile-details');
+            const profileEditForm = document.getElementById('profile-edit-form');
+            
+            if (storedDetails) {
+                document.getElementById('profile-name').textContent = storedDetails.name;
+                document.getElementById('profile-class').textContent = storedDetails.class;
+                document.getElementById('profile-roll-no').textContent = storedDetails.rollNo;
+                document.getElementById('profile-school').textContent = storedDetails.school;
+                document.getElementById('profile-verification-id').textContent = storedDetails.verificationId;
+                document.getElementById('profile-father-name').textContent = storedDetails.fatherName;
+                document.getElementById('profile-fav-subject').textContent = storedDetails.favSubject;
+                document.getElementById('profile-fav-color').textContent = storedDetails.favColor;
+                
+                profileDetails.style.display = 'flex';
+                profileEditForm.style.display = 'none';
+            } else {
+                profileDetails.innerHTML = '<p class="text-center text-gray-500">No profile details found. Please fill out the form.</p>';
+            }
+        }
+
+        function editProfileDetails() {
+            const storedDetails = JSON.parse(localStorage.getItem('userDetails'));
+            const profileDetails = document.getElementById('profile-details');
+            const profileEditForm = document.getElementById('profile-edit-form');
+            
+            if (storedDetails) {
+                document.getElementById('edit-name-input').value = storedDetails.name;
+                document.getElementById('edit-class-input').value = storedDetails.class;
+                document.getElementById('edit-roll-no-input').value = storedDetails.rollNo;
+                document.getElementById('edit-school-input').value = storedDetails.school;
+                document.getElementById('edit-verification-id-input').value = storedDetails.verificationId;
+                document.getElementById('edit-father-name-input').value = storedDetails.fatherName;
+                document.getElementById('edit-fav-subject-input').value = storedDetails.favSubject;
+                
+                const editColorSwatches = document.querySelectorAll('#color-palette-edit .color-swatch');
+                editColorSwatches.forEach(swatch => {
+                    swatch.classList.remove('selected-color');
+                    if (swatch.dataset.color === storedDetails.favColor) {
+                        swatch.classList.add('selected-color');
+                    }
+                });
+                document.getElementById('edit-fav-color-input').value = storedDetails.favColor;
+            }
+
+            profileDetails.style.display = 'none';
+            profileEditForm.style.display = 'flex';
+        }
+
+        function cancelEdit() {
+            const profileDetails = document.getElementById('profile-details');
+            const profileEditForm = document.getElementById('profile-edit-form');
+            
+            profileDetails.style.display = 'flex';
+            profileEditForm.style.display = 'none';
+        }
+
+        const colorPalette = ['#B22222', '#FFB347', '#E55B13', '#6B4E28', '#FFEAD2'];
+
+        function renderColorPalettes() {
+            const formPalette = document.getElementById('color-palette-form');
+            const editPalette = document.getElementById('color-palette-edit');
+            
+            renderPalette(formPalette, 'fav-color-input');
+            renderPalette(editPalette, 'edit-fav-color-input');
+        }
+
+        function renderPalette(container, inputId) {
+            container.innerHTML = '';
+            colorPalette.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.classList.add('color-swatch');
+                swatch.style.backgroundColor = color;
+                swatch.dataset.color = color;
+                swatch.onclick = () => selectColor(color, container, inputId);
+                container.appendChild(swatch);
+            });
+        }
+
+        function selectColor(color, container, inputId) {
+            const swatches = container.querySelectorAll('.color-swatch');
+            swatches.forEach(swatch => swatch.classList.remove('selected-color'));
+            
+            const selectedSwatch = container.querySelector(`[data-color="${color}"]`);
+            if (selectedSwatch) {
+                selectedSwatch.classList.add('selected-color');
+            }
+            
+            document.getElementById(inputId).value = color;
+            updateProfileIconColor(color);
+        }
+
+        function hexToRgb(hex) {
+            const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+                return r + r + g + g + b + b;
+            });
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function updateProfileIconColor(hexColor) {
+            const icon = document.getElementById('profile-icon');
+            const initial = document.getElementById('profile-initial');
+            if (icon && initial) {
+                icon.style.backgroundColor = hexColor;
+
+                const rgb = hexToRgb(hexColor);
+                if (rgb) {
+                    const luminance = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+                    initial.style.color = luminance > 0.5 ? '#073D54' : '#F0F9FF';
+                }
+            }
+        }
+
+        function saveUserDetails(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name-input').value;
+            const userClass = document.getElementById('class-input').value;
+            const rollNo = document.getElementById('roll-no-input').value;
+            const school = document.getElementById('school-input').value;
+            const verificationId = document.getElementById('verification-id-input').value;
+            const fatherName = document.getElementById('father-name-input').value;
+            const favSubject = document.getElementById('fav-subject-input').value;
+            const favColor = document.getElementById('fav-color-input').value;
+
+            const userDetails = {
+                name,
+                class: userClass,
+                rollNo,
+                school,
+                verificationId,
+                fatherName,
+                favSubject,
+                favColor
+            };
+
+            localStorage.setItem('userDetails', JSON.stringify(userDetails));
+            localStorage.setItem('firstTimeUser', 'false');
+            
+            updateStreak();
+            startUsageTimer();
+            showMainUI();
+        }
+        
+        function saveEditedDetails(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('edit-name-input').value;
+            const userClass = document.getElementById('edit-class-input').value;
+            const rollNo = document.getElementById('edit-roll-no-input').value;
+            const school = document.getElementById('edit-school-input').value;
+            const verificationId = document.getElementById('edit-verification-id-input').value;
+            const fatherName = document.getElementById('edit-father-name-input').value;
+            const favSubject = document.getElementById('edit-fav-subject-input').value;
+            const favColor = document.getElementById('edit-fav-color-input').value;
+
+            const userDetails = {
+                name,
+                class: userClass,
+                rollNo,
+                school,
+                verificationId,
+                fatherName,
+                favSubject,
+                favColor
+            };
+
+            localStorage.setItem('userDetails', JSON.stringify(userDetails));
+            
+            renderProfileDetails();
+            cancelEdit();
+        }
+
+        // Initial check to show the main UI or the user details form on load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderColorPalettes();
+            const isFirstTime = localStorage.getItem('firstTimeUser') === null;
+            if (isFirstTime) {
+                // Show splash screen and then form
+                document.getElementById('user-details-form-page').style.display = 'flex';
+                document.getElementById('user-details-form').addEventListener('submit', saveUserDetails);
+            } else {
+                // Skip splash screen and go directly to main UI
+                document.getElementById('splash-screen').style.display = 'none';
+                updateStreak();
+                startUsageTimer();
+                showMainUI();
+            }
+            document.getElementById('profile-edit-form').addEventListener('submit', saveEditedDetails);
+        });
+        
+        // Splash screen and animations
+        window.addEventListener('load', () => {
+            const isFirstTime = localStorage.getItem('firstTimeUser') === null;
+            if (isFirstTime) {
+                const splashScreen = document.getElementById('splash-screen');
+                const ignitexAnimationContainer = document.getElementById('ignitex-animation-container');
+                
+                // Show the logo container with a zoom-in animation
+                setTimeout(() => {
+                    ignitexAnimationContainer.classList.add('show');
+                }, 500);
+
+                // Hide the splash screen after the animation
+                setTimeout(() => {
+                    ignitexAnimationContainer.classList.add('zoom-out-full-page');
+                }, 2000);
+
+                setTimeout(() => {
+                    splashScreen.classList.add('fade-out');
+                    document.getElementById('user-details-form-page').style.display = 'flex';
+                }, 3000);
+            }
+        });
+        
+        function setPageVisibility(pageId) {
+            const pages = document.querySelectorAll('#quotes-page, #calendar-page, #stories-page, #assignments-page, #profile-page, #user-details-form-page, #main-ui, #new-section-page, #word-puzzle-page, #speed-math-page, #streak-page, #games-page');
+            
+            pages.forEach(page => {
+                if(page.id === pageId) {
+                    page.style.display = 'flex';
+                    page.classList.add('active');
+                } else {
+                    page.style.display = 'none';
+                    page.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic UI - Login & Registration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Fredoka One', cursive;
+            background-color: #F8F4EE;
+            color: #3C3744;
+            overflow: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150vw;
+            height: 150vw;
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.05) 0%, rgba(248, 244, 238, 0) 60%);
+            z-index: -1;
+        }
+        .form-container {
+            background-color: #E5E0DA;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 450px;
+            animation: fadeIn 0.5s ease-in-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input, select, textarea {
+            padding: 1rem;
+            border: 2px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background-color: #F8F4EE;
+            color: #3C3744;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #DC143C;
+        }
+        button[type="submit"] {
+            background-color: #DC143C;
+            color: white;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        button[type="submit"]:hover {
+            transform: scale(1.05);
+            background-color: #FF4500;
+        }
+        .toggle-text {
+            color: #DC143C;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+        .toggle-text:hover {
+            color: #FF4500;
+        }
+        #error-message-login, #error-message-register {
+            color: #DC143C;
+        }
+        #student-details-fields {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+        }
+        #student-details-fields.visible {
+            max-height: 500px;
+            opacity: 1;
+        }
+        .forgot-link {
+            text-align: right;
+            font-size: 0.875rem;
+            margin-top: -0.5rem;
+            color: #DC143C;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .forgot-link:hover {
+            color: #FF4500;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="text-center mb-10">
+        <h1 class="text-5xl text-[#DC143C] font-bold">IgniteX</h1>
+        <p class="text-lg text-[#3C3744] mt-2">Your educational companion</p>
+    </div>
+
+    <div id="auth-container" class="form-container">
+        <div id="login-form-div">
+            <h2 class="text-3xl font-bold text-center mb-6">Login</h2>
+            <form id="login-form" class="flex flex-col space-y-4">
+                <input type="text" id="login-username" placeholder="Username" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <a href="#" id="forgot-link" class="forgot-link">Forgot Username or Password?</a>
+                <p id="error-message-login" class="text-center text-sm hidden"></p>
+                <button type="submit" class="w-full py-4 text-lg">Login</button>
+            </form>
+            <p class="text-center mt-4 text-sm">
+                Don't have an account? <span id="show-register" class="toggle-text">Register here</span>
+            </p>
+        </div>
+
+        <div id="register-form-div" class="hidden">
+            <h2 class="text-3xl font-bold text-center mb-6">Register</h2>
+            <form id="register-form" class="flex flex-col space-y-4">
+                <input type="text" id="register-name" placeholder="Full Name" required>
+                <input type="text" id="register-username" placeholder="Username" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
+                <select id="register-role" required>
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="parent">Parent</option>
+                </select>
+                
+                <div id="student-details-fields" class="flex flex-col space-y-4">
+                    <input type="text" id="student-class" placeholder="Class">
+                    <input type="text" id="student-fav-subject" placeholder="Favorite Subject">
+                    <textarea id="student-aim" placeholder="Your aim in life..." rows="3"></textarea>
+                </div>
+
+                <p id="error-message-register" class="text-center text-sm hidden"></p>
+                <button type="submit" class="w-full py-4 text-lg">Register</button>
+            </form>
+            <p class="text-center mt-4 text-sm">
+                Already have an account? <span id="show-login" class="toggle-text">Login here</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginFormDiv = document.getElementById('login-form-div');
+            const registerFormDiv = document.getElementById('register-form-div');
+            const showRegisterBtn = document.getElementById('show-register');
+            const showLoginBtn = document.getElementById('show-login');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const registerRole = document.getElementById('register-role');
+            const studentDetailsFields = document.getElementById('student-details-fields');
+            const errorMessageLogin = document.getElementById('error-message-login');
+            const errorMessageRegister = document.getElementById('error-message-register');
+            const forgotLink = document.getElementById('forgot-link');
+
+            // Toggle between login and registration forms
+            showRegisterBtn.addEventListener('click', () => {
+                loginFormDiv.classList.add('hidden');
+                registerFormDiv.classList.remove('hidden');
+                errorMessageLogin.classList.add('hidden');
+            });
+
+            showLoginBtn.addEventListener('click', () => {
+                registerFormDiv.classList.add('hidden');
+                loginFormDiv.classList.remove('hidden');
+                errorMessageRegister.classList.add('hidden');
+            });
+
+            // Show/hide student fields based on role selection
+            registerRole.addEventListener('change', (e) => {
+                if (e.target.value === 'student') {
+                    studentDetailsFields.classList.add('visible');
+                } else {
+                    studentDetailsFields.classList.remove('visible');
+                }
+            });
+
+            // Handle Registration
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('register-name').value;
+                const username = document.getElementById('register-username').value;
+                const password = document.getElementById('register-password').value;
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+                const role = document.getElementById('register-role').value;
+
+                if (password !== confirmPassword) {
+                    errorMessageRegister.textContent = 'Passwords do not match.';
+                    errorMessageRegister.classList.remove('hidden');
+                    return;
+                }
+
+                const users = JSON.parse(localStorage.getItem('users')) || {};
+                if (users[username]) {
+                    errorMessageRegister.textContent = 'Username already exists.';
+                    errorMessageRegister.classList.remove('hidden');
+                    return;
+                }
+                
+                const newUser = { name, password, role };
+                
+                if (role === 'student') {
+                    newUser.class = document.getElementById('student-class').value;
+                    newUser.favSubject = document.getElementById('student-fav-subject').value;
+                    newUser.aim = document.getElementById('student-aim').value;
+                }
+
+                users[username] = newUser;
+                localStorage.setItem('users', JSON.stringify(users));
+
+                errorMessageRegister.textContent = 'Registration successful! You can now log in.';
+                errorMessageRegister.style.color = 'green';
+                errorMessageRegister.classList.remove('hidden');
+                setTimeout(() => {
+                    registerFormDiv.classList.add('hidden');
+                    loginFormDiv.classList.remove('hidden');
+                    errorMessageRegister.classList.add('hidden');
+                    errorMessageRegister.style.color = '#DC143C';
+                    registerForm.reset();
+                }, 2000);
+            });
+
+            // Handle Login
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+
+                const users = JSON.parse(localStorage.getItem('users')) || {};
+                const user = users[username];
+
+                if (user && user.password === password) {
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    
+                    if (user.role === 'student') {
+                        window.location.href = 'student.html';
+                    } else if (user.role === 'teacher') {
+                        window.location.href = 'teacher.html';
+                    } else if (user.role === 'parent') {
+                        window.location.href = 'parent.html';
+                    } else {
+                        alert('Login successful! Redirecting to dashboard...');
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    errorMessageLogin.textContent = 'Invalid username or password.';
+                    errorMessageLogin.classList.remove('hidden');
+                }
+            });
+
+            // Handle Forgot Password/Username link
+            forgotLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('This is where you would start a recovery process. For this demo, please remember your credentials.');
+            });
+        });
+    </script>
+</body>
+</html>
